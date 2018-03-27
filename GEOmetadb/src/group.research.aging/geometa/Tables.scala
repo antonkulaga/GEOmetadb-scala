@@ -1,3 +1,11 @@
+package group.research.aging.geometa
+
+import io.getquill.Embedded
+import shapeless._
+import record._, syntax.singleton._
+import record._
+import syntax.singleton._
+
 object Tables {
 
     case class gse
@@ -31,7 +39,7 @@ object Tables {
     )
 
     case class gpl(
-                    ID: String,
+                    ID: Double,
                     title: String,
                     gpl: String,
                     status: String,
@@ -48,66 +56,73 @@ object Tables {
                     description: String,
                     web_link: String,
                     contact: String,
-                    data_row_count: String,
+                    data_row_count: Double,
                     supplementary_file: String,
                     bioc_package: String
                   )
 
-    case class gsm(
-                    ID: String,
-                    title: String,
-                    gsm: String,
-                    series_id: String,
-                    gpl: String,
-                    status: String,
-                    submission_date: String,
-                    last_update_date: String,
-                    `type`: String,
-                    channel_count: Double,
-                    source_name_ch1: String,
-                    organism_ch1: String,
-                    characteristics_ch1: String,
-                    molecule_ch1: String,
-                    label_ch1: String,
-                    treatment_protocol_ch1: String,
-                    extract_protocol_ch1: String,
-                    label_protocol_ch1: String,
-                    source_name_ch2: String,
-                    organism_ch2: String,
-                    characteristics_ch2: String,
-                    molecule_ch2: String,
-                    label_ch2: String,
-                    treatment_protocol_ch2: String,
-                    extract_protocol_ch2: String,
-                    label_protocol_ch2: String,
-                    hyb_protocol: String,
-                    description: String,
-                    data_processing: String,
-                    contact: String,
-                    supplementary_file: String,
-                    data_row_count: Double
-                  )
+  case class Ch2(source_name_ch2: String,
+                 organism_ch2: String,
+                 characteristics_ch2: String,
+                 molecule_ch2: String,
+                 label_ch2: String,
+                 treatment_protocol_ch2: String,
+                 extract_protocol_ch2: String,
+                 label_protocol_ch2: String) extends Embedded
 
-    case class gds(
-                    ID: String,
-                    gds: String,
-                    title: String,
-                    description: String,
-                    `type`: String,
-                    pubmed_id: String,
-                    gpl: String,
-                    platform_organism: String,
-                    platform_technology_type: String,
-                    feature_count: Int,
-                    sample_organism: String,
-                    sample_type: String,
-                    channel_count: String,
-                    sample_count: Int,
-                    value_type: String,
-                    gse: String,
-                    order: String,
-                    update_date: String
-                  )
+  case class gsm(
+                  ID: String,
+                  title: String,
+                  gsm: String,
+                  series_id: String,
+                  gpl: String,
+                  status: String,
+                  submission_date: String,
+                  last_update_date: String,
+                  `type`: String,
+                  source_name_ch1: String,
+                  organism_ch1: String,
+                  characteristics_ch1: String,
+                  molecule_ch1: String,
+                  label_ch1: String,
+                  treatment_protocol_ch1: String,
+                  extract_protocol_ch1: String,
+                  label_protocol_ch1: String,
+                  ch2: Ch2,
+                  hyb_protocol: String,
+                  description: String,
+                  data_processing: String,
+                  contact: String,
+                  supplementary_file: String,
+                  data_row_count: Double,
+                  channel_count: Double,
+                )
+
+
+  case class gds(
+                  ID: String,
+                  gds: String,
+                  title: String,
+                  description: String,
+                  `type`: String,
+                  pubmed_id: String,
+                  gpl: String,
+                  platform_organism: String,
+                  platform_technology_type: String,
+                  feature_count: Int,
+                  sample_organism: String,
+                  sample_type: String,
+                  channel_count: String,
+                  sample_count: Int,
+                  value_type: String,
+                  gse: String,
+                  order: String,
+                  update_date: String
+                )
+
+  case class gse_gsm(gse: String, gsm: String)
+  case class gse_gpl(gse: String, gpl: String)
+
 
 
 }
