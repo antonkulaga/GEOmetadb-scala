@@ -1,8 +1,10 @@
 package group.research.aging.geometa
 
 import io.getquill.Embedded
+import model.persistence.HasId
 import shapeless._
-import record._, syntax.singleton._
+import record._
+import syntax.singleton._
 import record._
 import syntax.singleton._
 
@@ -69,6 +71,10 @@ object Tables {
                  treatment_protocol_ch2: String,
                  extract_protocol_ch2: String,
                  label_protocol_ch2: String) extends Embedded
+
+  object gsm {
+    val labeledGen = LabelledGeneric[Tables.gsm]
+  }
 
   case class gsm(
                   ID: String,

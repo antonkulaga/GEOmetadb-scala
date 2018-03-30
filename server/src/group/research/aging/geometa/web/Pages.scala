@@ -1,7 +1,5 @@
 package group.research.aging.geometa.web
 
-import shared.Hello.sayHello
-
 object Pages extends Pages
 trait Pages {
 

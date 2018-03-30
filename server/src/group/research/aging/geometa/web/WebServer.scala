@@ -1,14 +1,17 @@
 package group.research.aging.geometa.web
 
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.HttpApp
-import akka.http.scaladsl.server.Route
+import com.typesafe.config.ConfigFactory
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import group.research.aging.geometa.GEOmeta
+import group.research.aging.geometa.web.controller.Controller
+import io.getquill.{Literal, SqliteJdbcContext}
 import scalacss.DevDefaults._
-import shared.Hello._
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 // Server definition
-object WebServer extends HttpApp {
+object WebServer extends HttpApp with FailFastCirceSupport{
 
   def loadPage(page: String, parameters: String*) =
     <html>
@@ -40,6 +43,11 @@ object WebServer extends HttpApp {
     complete(loadPage("gsm"))
   }
 
+  def view = pathPrefix("view" / "gsm") {
+    complete{
+      Controller.getSamples(50)
+    }
+  }
 
   override def routes =
     (pathSingleSlash |  path("index.html")) {
@@ -47,7 +55,7 @@ object WebServer extends HttpApp {
     } ~ mystyles ~
       pathPrefix("pages" / Remaining) { page =>
       complete(loadPage(page))
-    } ~
+    } ~ view ~
       path("public" / Segment){ name =>
         getFromResource(name.toString)
       }
