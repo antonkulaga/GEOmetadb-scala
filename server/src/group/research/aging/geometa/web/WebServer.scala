@@ -39,8 +39,8 @@ object WebServer extends HttpApp with FailFastCirceSupport{
       HttpResponse(  entity = HttpEntity(MediaTypes.`text/css`.withCharset(HttpCharsets.`UTF-8`),  MyStyles.render   ))   }
   }
 
-  def pages =  pathPrefix("pages" / Remaining) { file =>
-    complete(loadPage("gsm"))
+  def pages =  pathPrefix("pages" / Remaining) { page =>
+    complete(loadPage(page))
   }
 
   def view = pathPrefix("view" / "gsm") {

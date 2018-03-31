@@ -61,19 +61,6 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     val platforms = context.run(q).map(get_sequencer)
     SortedSet(platforms:_*)
   }
-
-  /*
-  def all_species() = {
-    val q = context.quote{
-      val results = for {
-        sample <- query[Tables.gsm]
-        gpl <- query[Tables.gpl]
-        if sample.gpl == gpl.gpl
-        if gpl.technology == lift(technology)
-      } yield sample.
-    }
-  }
-  */
   
   def gpl(limit: Int): List[Tables.gpl] = {
     val q = context.quote{
