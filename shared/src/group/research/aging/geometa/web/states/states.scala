@@ -1,4 +1,5 @@
-package group.research.aging.geometa.web
+package group.research.aging.geometa.web.states
+
 
 // Data type for the entire application state:
 trait State {
@@ -11,7 +12,6 @@ case object DefaultState extends State{
   lazy val page = "index"
   val headers = Nil
   val data = Nil
-
 }
 
 case object TestState extends State{

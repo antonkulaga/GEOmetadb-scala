@@ -1,12 +1,6 @@
 package group.research.aging.geometa
 
-import io.getquill.Embedded
-import model.persistence.HasId
 import shapeless._
-import record._
-import syntax.singleton._
-import record._
-import syntax.singleton._
 
 object Tables {
 
@@ -63,14 +57,18 @@ object Tables {
                     bioc_package: String
                   )
 
-  case class Ch2(source_name_ch2: String,
-                 organism_ch2: String,
-                 characteristics_ch2: String,
-                 molecule_ch2: String,
-                 label_ch2: String,
-                 treatment_protocol_ch2: String,
-                 extract_protocol_ch2: String,
-                 label_protocol_ch2: String) extends Embedded
+
+  trait Ch2 {
+    def source_name_ch2: String
+    def organism_ch2: String
+    def characteristics_ch2: String
+    def molecule_ch2: String
+    def label_ch2: String
+    def treatment_protocol_ch2: String
+    def extract_protocol_ch2: String
+    def label_protocol_ch2: String
+  }
+
 
   object gsm {
     val labeledGen = LabelledGeneric[Tables.gsm]
@@ -94,7 +92,14 @@ object Tables {
                   treatment_protocol_ch1: String,
                   extract_protocol_ch1: String,
                   label_protocol_ch1: String,
-                  ch2: Ch2,
+                  source_name_ch2: String,
+                  organism_ch2: String,
+                  characteristics_ch2: String,
+                  molecule_ch2: String,
+                  label_ch2: String,
+                  treatment_protocol_ch2: String,
+                  extract_protocol_ch2: String,
+                  label_protocol_ch2: String,
                   hyb_protocol: String,
                   description: String,
                   data_processing: String,
@@ -102,7 +107,7 @@ object Tables {
                   supplementary_file: String,
                   data_row_count: Double,
                   channel_count: Double,
-                )
+                ) extends Ch2
 
 
   case class gds(

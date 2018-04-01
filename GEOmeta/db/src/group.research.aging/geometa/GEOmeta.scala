@@ -6,6 +6,7 @@ import shapeless._
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import scala.collection.immutable._
+import group.research.aging.geometa.models._
 
 class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
   import context._
