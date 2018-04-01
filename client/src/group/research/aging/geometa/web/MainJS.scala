@@ -1,30 +1,26 @@
 package group.research.aging.geometa.web
 
-import group.research.aging.geometa.web.actions.LoadPage
-import wvlet.log.LogSupport
-import mhtml._
-import mhtml.mount
-import org.scalajs.dom
-import group.research.aging.geometa.web.states
-import hammock.Hammock
-import hammock.js.Interpreter
-
-import scala.concurrent.Future
-import scala.util._
-import scala.scalajs.js.annotation._
-import scala.xml.Elem
 import cats.effect.IO
-import group.research.aging.geometa.models.Sequencing_GSM
-import io.circe.generic.auto._
-import hammock._
-import hammock.marshalling._
-import hammock.js.Interpreter
+import group.research.aging.geometa.web.actions.LoadPage
+import hammock.{Hammock, _}
 import hammock.circe.implicits._
+import hammock.js.Interpreter
+import hammock.marshalling._
+import io.circe.generic.auto._
+import mhtml.{mount, _}
+import org.scalajs.dom
+import wvlet.log.LogSupport
+
+import scala.collection.immutable._
+import scala.scalajs.js.annotation._
+import scala.util._
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 @JSExportTopLevel("MainJS")
 object MainJS  extends LogSupport{
 
-  implicit val interpreter = Interpreter[Future]
+  //implicit val interpreter = Interpreter[IO]
+  implicit val interpreter = Interpreter[IO]
 
   type Reducer = PartialFunction[(states.State, actions.Action), states.State]
 
@@ -39,12 +35,11 @@ object MainJS  extends LogSupport{
   // A single State => Html function for the entire page:
   //def view(state: Rx[State]): xml.Node =
 
-  val state: Rx[states.State] = Var(states.TestState)
+  val state: Rx[states.State] = Var(states.State.empty)
 
   val headers: Rx[List[String]] = state.map(s=>s.headers)
 
   val data: Rx[List[List[String]]] = state.map(s=> s.data)
-
 
   val component= <table id="workflows" class="ui small blue striped celled table">
     <thead>
@@ -60,27 +55,33 @@ object MainJS  extends LogSupport{
   def dataRow(row: List[String]) = <tr> {row.map(c=> <td>{c}</td>)} </tr>
 
   val toLoad: Var[actions.ToLoad] = Var(
-    actions.ToLoad.empty
+    actions.NothingToLoad
   )
 
-  val loaded: Var[actions.Action] = Var(actions.NothingLoaded)
+  val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
 
   val allActions: Rx[actions.Action] = toLoad merge loaded merge loaded
 
   val loadReducer: Reducer = {
-    case (previos, LoadPage(page)) =>
+
+    case (previous, actions.NothingToLoad) =>
+      previous
+
+    case (previous, actions.LoadPage(page)) =>
       //toLoad :=
-      Hammock.request(Method.GET, uri"/view/${page}", Map.empty).as[actions.LoadSequencing].exec[Future].onComplete{
-        case Success(results) =>
-          loaded := results
-        case Failure(th) => error(th)
-      }
-      previos
+      Hammock.request(Method.GET, uri"/view/${page}", Map.empty)
+        .as[actions.LoadedSequencing]
+        .exec[IO].unsafeToFuture()
+        .onComplete{
+          case Success(results) => loaded := results
+          case Failure(th) => error(th)
+        }
+      previous
 
-    case (previos, actions.LoadSequencing(
-      sequencing: List[Sequencing_GSM],  limit: Long, offset: Long)) =>
-
-      previos
+    case (previous, actions.LoadedSequencing( samples,  limit, offset)) =>
+      val data_new: List[List[String]] = samples.map(s=>s.asStringList)
+      val headers_new: List[String] = if(samples.isEmpty) Nil else samples.head.fieldNames
+      previous.copy( "gsm", headers_new, data_new)
   }
 
   def onOther : Reducer = {

@@ -50,7 +50,7 @@ object WebServer extends HttpApp with FailFastCirceSupport{
 
   def view = pathPrefix("view" / "gsm") {
     complete{
-      Controller.loadSamplesPage().asJson
+      Controller.loadSequencing().asJson
     }
   }
 

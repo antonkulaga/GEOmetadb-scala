@@ -40,6 +40,7 @@ import shapeless.{LabelledGeneric, _}
   def asMap = asRecord.toMap
   def asList = asRecord.toList
   def keys = asRecord.keys
+  def fieldNames = keys.toList.map(_.toString)
   def asStringList = asList.map(_.toString)
 
 }

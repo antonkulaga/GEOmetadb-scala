@@ -6,23 +6,16 @@ import io.circe.generic.JsonCodec
 // Data type for events coming from the outside world:
 trait Action
 
+trait ToLoad extends Action
+
+case object NothingToLoad extends ToLoad
+
+@JsonCodec case class LoadAjax(url: String) extends ToLoad
+
+
 object LoadPage {
   lazy val test = LoadPage("test")
 }
 
-object ToLoad {
-  @JsonCodec case object empty extends ToLoad
-}
-trait ToLoad extends Action
-
-@JsonCodec case class LoadAjax(url: String) extends ToLoad
-
 @JsonCodec case class LoadPage(name: String) extends ToLoad
 
-@JsonCodec case class LoadSequencing(
-                           sequencing: List[Sequencing_GSM],
-                           limit: Long,
-                           offset: Long
-                         ) extends Action
-
-//case class LoadedSequencing(data: Sequencing_GSM)
