@@ -42,8 +42,6 @@ import shapeless.{LabelledGeneric, _}
   def keys = asRecord.keys
   def asStringList = asList.map(_.toString)
 
-
-
 }
 
 

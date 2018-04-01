@@ -1,6 +1,16 @@
 package group.research.aging.geometa.web.states
 
+import io.circe.generic.JsonCodec
 
+
+object State {
+
+}
+
+@JsonCodec case class State (page: String, headers: List[String], data: List[List[String]])
+
+
+/*
 // Data type for the entire application state:
 trait State {
   def page: String
@@ -23,3 +33,5 @@ case object TestState extends State{
     List("one_value3", "two_value3", "three_value3"),
   )
 }
+*/
+

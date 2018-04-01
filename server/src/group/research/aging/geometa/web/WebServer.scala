@@ -9,9 +9,12 @@ import group.research.aging.geometa.GEOmeta
 import group.research.aging.geometa.web.controller.Controller
 import io.getquill.{Literal, SqliteJdbcContext}
 import scalacss.DevDefaults._
+import io.circe.syntax._
 
 // Server definition
 object WebServer extends HttpApp with FailFastCirceSupport{
+
+  def un(str: String) = scala.xml.Unparsed(str)
 
   def loadPage(page: String, parameters: String*) =
     <html>
@@ -25,8 +28,10 @@ object WebServer extends HttpApp with FailFastCirceSupport{
       </head>
     <body id="main">
       <script type="text/javascript" src="/public/out.js">
-        alert({"\""+ page+"\""})
-        MainJS.page({"\""+ page+"\""}"{parameters.foldLeft(""){ (acc, el) => acc + ", " + "\""+ el+ "\""}})
+      </script>
+      <script type="text/javascript">
+        alert({un("\""+ page+"\"")})
+        MainJS.page({un("\""+ page+"\"")}"{un(parameters.foldLeft(""){ (acc, el) => acc + ", " + "\""+ el+ "\""})})
       </script>
     </body>
     </html>
@@ -45,13 +50,13 @@ object WebServer extends HttpApp with FailFastCirceSupport{
 
   def view = pathPrefix("view" / "gsm") {
     complete{
-      Controller.getSamples(50)
+      Controller.loadSamplesPage().asJson
     }
   }
 
   override def routes =
     (pathSingleSlash |  path("index.html")) {
-      complete(loadPage("gsm"))
+      complete(loadPage("sequencing"))
     } ~ mystyles ~
       pathPrefix("pages" / Remaining) { page =>
       complete(loadPage(page))

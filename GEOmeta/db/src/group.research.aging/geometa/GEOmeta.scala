@@ -28,26 +28,31 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
 		 gsm.organism_ch1= 'Caenorhabditis elegans');"
     */
 
+/*
+  def limited[T](q: context.Quoted[context.Query[T]], limit: Int = 0, offset: Int = 0) = {
+    if(limit>=0) q.drop(lift(offset)).take(lift(limit))  else  q.drop(lift(offset))
+  }
+*/
 
-  def sequencing_gsm(limit: Int)= {
+  def sequencing_gsm(limit: Int = 0, offset: Int = 0)= {
     val q = context.quote{
-      val results = for {
+      for {
         sample <- query[Tables.gsm]
         gpl <- query[Tables.gpl]
         if sample.gpl == gpl.gpl
         if gpl.technology == lift(technology)
       } yield { (sample, gpl.title) }
-      results.take(lift(limit))
     }
-    context.run(q).map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
   }
 
 
-  def gsm(limit: Int): List[Tables.gsm] = {
+  def gsm(limit: Int = 0, offset: Int = 0): List[Tables.gsm] = {
     val q = context.quote{
-      query[Tables.gsm].take(lift(limit))
+      query[Tables.gsm]
     }
-    context.run(q)
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
   }
 
   def get_sequencer(n: String): String =  n.indexOf(" (") match {
@@ -63,11 +68,11 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     SortedSet(platforms:_*)
   }
   
-  def gpl(limit: Int): List[Tables.gpl] = {
+  def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {
     val q = context.quote{
-      query[Tables.gpl].filter(g=>g.technology == lift(technology)).take(lift(limit))
+      query[Tables.gpl].filter(g=>g.technology == lift(technology))
     }
-    context.run(q)
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
   }
 
 }
