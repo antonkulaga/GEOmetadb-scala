@@ -44,7 +44,7 @@ object geo extends Module {
 
     override def ivyDeps = geo_ivy_deps
 
-    override def scalacPluginIvyDeps = plugins
+    override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ plugins
 
 		override def sources = T.sources(
 			millSourcePath / src,
@@ -111,7 +111,7 @@ object web extends Module{
         ivy"in.nvilla::monadic-rx-cats::0.4.0-RC1"
 	  )
 
-	 override def scalacPluginIvyDeps = plugins
+	 override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ plugins
 
 		override def millSourcePath = super.millSourcePath / up
 
