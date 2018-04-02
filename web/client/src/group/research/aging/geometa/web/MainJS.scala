@@ -15,8 +15,7 @@ import scala.scalajs.js.annotation._
 import scala.util._
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-@JSExportTopLevel("MainJS")
-object MainJS  extends LogSupport{
+object MainJS  extends App with LogSupport{
 
   implicit val interpreter = Interpreter[IO]
   type Reducer = PartialFunction[(states.State, actions.Action), states.State]
