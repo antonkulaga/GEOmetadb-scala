@@ -98,6 +98,8 @@ object web extends Module{
 
 	  def scalaJSVersion = scala_js_version
 
+		override def mainClass = Some("group.research.aging.geometa.web.MainJS")
+
 	  override def moduleDeps = Seq(geo.js)
 
 	  override def repositories = super.repositories ++ resolvers
@@ -114,9 +116,9 @@ object web extends Module{
 		override def millSourcePath = super.millSourcePath / up
 
 		override def sources = T.sources(
-			millSourcePath / src,
-			millSourcePath / "client" / src
-		)
+			millSourcePath / "client" / src,
+      millSourcePath / src
+    )
 	}
 
 	object server extends ScalaModule {
@@ -139,7 +141,7 @@ object web extends Module{
 	  
 	  override def resources = T.sources {
 			def base : Seq[Path] = super.resources().map(_.path)
-			def jsout = client.fastOpt().path / up
+			def jsout = client.fullOpt().path / up
 			(base ++ Seq(jsout)).map(PathRef(_))
 	  }	 
 
