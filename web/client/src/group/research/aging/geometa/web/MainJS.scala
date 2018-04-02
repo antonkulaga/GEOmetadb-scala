@@ -1,7 +1,6 @@
 package group.research.aging.geometa.web
 
 import cats.effect.IO
-import group.research.aging.geometa.web.actions.LoadPage
 import hammock.{Hammock, _}
 import hammock.circe.implicits._
 import hammock.js.Interpreter
@@ -19,21 +18,15 @@ import scalajs.concurrent.JSExecutionContext.Implicits.queue
 @JSExportTopLevel("MainJS")
 object MainJS  extends LogSupport{
 
-  //implicit val interpreter = Interpreter[IO]
   implicit val interpreter = Interpreter[IO]
-
   type Reducer = PartialFunction[(states.State, actions.Action), states.State]
-
-  //Logger.setDefaultHandler(new JSConsoleLogHandler)
 
   @JSExport
   def page(page: String, parameters: String*) = {
+	  //dom.window.alert(page)
     info(s"GEOmetadb Web applications loaded:\n page = ${page} \nwith parameters = ${parameters.reduce(_ + " " + _)}")
-    toLoad := actions.LoadPage(page)
+    //toLoad := actions.LoadPage(page)
   }
-
-  // A single State => Html function for the entire page:
-  //def view(state: Rx[State]): xml.Node =
 
   val state: Rx[states.State] = Var(states.State.empty)
 
@@ -97,7 +90,6 @@ object MainJS  extends LogSupport{
   // The application State, probably initialize that from local store / DB
   // updates could also be save on every update.
   //val store: Rx[states.State] = allactions.foldp(states.DefaultState)(reducer)
-
   val div = dom.document.getElementById("main")
   mount(div, component)
 

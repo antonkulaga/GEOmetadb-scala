@@ -21,7 +21,7 @@ object Controller {
 
   def loadSequencing(limit: Long = 0, offset: Long = 0) = {
     val gsms = getSamples(limit)
-    actions.LoadSequencing(gsms, limit, offset)
+    actions.LoadedSequencing(gsms, limit, offset)
     //actions
   }
 
