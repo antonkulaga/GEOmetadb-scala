@@ -30,7 +30,7 @@ object WebServer extends HttpApp with FailFastCirceSupport{
       <script type="text/javascript" src="/public/out.js">
       </script>
       <script type="text/javascript">
-        alert({un("\""+ page+"\"")})
+        console.log({un("\""+ page+"\"")})
         MainJS.page({
         un("\""+ page+"\"")}{un(parameters.foldLeft(""){ (acc, el) => acc + ", " + "\""+ el+ "\""})
         })

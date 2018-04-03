@@ -1,37 +1,31 @@
 package group.research.aging.geometa.web
 
-import cats.effect.IO
-import hammock.{Hammock, _}
-import hammock.circe.implicits._
-import hammock.js.Interpreter
-import hammock.marshalling._
-import io.circe.generic.auto._
-import mhtml.{mount, _}
+import mhtml._
 import org.scalajs.dom
 import wvlet.log.LogSupport
 
-import scala.collection.immutable._
 import scala.scalajs.js.annotation._
 import scala.util._
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-object MainJS  extends App with LogSupport{
+@JSExportTopLevel("MainJS")
+object MainJS extends LogSupport{
 
-  implicit val interpreter = Interpreter[IO]
   type Reducer = PartialFunction[(states.State, actions.Action), states.State]
 
   @JSExport
   def page(page: String, parameters: String*) = {
 	  //dom.window.alert(page)
-    info(s"GEOmetadb Web applications loaded:\n page = ${page} \nwith parameters = ${parameters.reduce(_ + " " + _)}")
-    //toLoad := actions.LoadPage(page)
+    val pString = parameters.foldLeft(""){ case (acc, el) => acc + " " + el}
+    info(s"GEOmetadb Web applications loaded:\n page = ${page} \nwith parameters = ${pString}")
+    toLoad := actions.LoadPage(page)
   }
 
   val state: Rx[states.State] = Var(states.State.empty)
 
-  val headers: Rx[List[String]] = state.map(s=>s.headers)
+  val headers = state.map(s=>s.headers)
 
-  val data: Rx[List[List[String]]] = state.map(s=> s.data)
+  val data = state.map(s=> s.data)
 
   val component= <table id="workflows" class="ui small blue striped celled table">
     <thead>
@@ -53,6 +47,16 @@ object MainJS  extends App with LogSupport{
   val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
 
   val allActions: Rx[actions.Action] = toLoad merge loaded merge loaded
+
+	import cats.effect.IO
+	import hammock.{Hammock, _}
+	import hammock.circe.implicits._
+	import hammock.js.Interpreter
+	import hammock.marshalling._
+	//import io.circe.generic.auto._
+
+  implicit val interpreter = Interpreter[IO]
+
 
   val loadReducer: Reducer = {
 
