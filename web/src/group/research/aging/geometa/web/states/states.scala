@@ -1,6 +1,8 @@
 package group.research.aging.geometa.web.states
 
+import group.research.aging.geometa.web.actions.ExplainedError
 import io.circe.generic.JsonCodec
+
 import scala.collection.immutable._
 
 object State {
@@ -16,7 +18,7 @@ object State {
   )
 }
 
-@JsonCodec case class State (page: String, headers: List[String], data: List[List[String]])
+@JsonCodec case class State (page: String, headers: List[String], data: List[List[String]], errors: List[ExplainedError] = Nil)
 
 
 /*

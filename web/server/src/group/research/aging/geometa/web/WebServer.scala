@@ -7,12 +7,20 @@ import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import group.research.aging.geometa.GEOmeta
 import group.research.aging.geometa.web.controller.Controller
+import group.research.aging.utils.SimpleSourceFormatter
 import io.getquill.{Literal, SqliteJdbcContext}
 import scalacss.DevDefaults._
 import io.circe.syntax._
+import wvlet.log.LogFormatter.SourceCodeLogFormatter
+import wvlet.log.{LogLevel, LogSupport, Logger}
 
 // Server definition
-object WebServer extends HttpApp with FailFastCirceSupport{
+object WebServer extends HttpApp with FailFastCirceSupport with LogSupport{
+
+  // Set the default log formatter
+  Logger.setDefaultFormatter(SourceCodeLogFormatter)
+  Logger.setDefaultLogLevel(LogLevel.DEBUG)
+
 
   def un(str: String) = scala.xml.Unparsed(str)
 
@@ -50,9 +58,10 @@ object WebServer extends HttpApp with FailFastCirceSupport{
     complete(loadPage(page))
   }
 
-  def view = pathPrefix("view" / "gsm") {
-    complete{
-      Controller.loadSequencing().asJson
+  lazy val defaultLimit = 50
+
+  def view = (pathPrefix("view" / "gsm") | pathPrefix("view" / "sequencing")) { complete{
+      Controller.loadSequencing(defaultLimit).asJson
     }
   }
 

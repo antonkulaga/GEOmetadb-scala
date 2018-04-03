@@ -19,3 +19,9 @@ object LoadPage {
 
 @JsonCodec case class LoadPage(name: String) extends ToLoad
 
+//case class Error(throwable: Throwable) extends Action
+
+object ExplainedError {
+  lazy val empty = ExplainedError("", "")
+}
+@JsonCodec case class ExplainedError(message: String, errorMessage: String) extends Action

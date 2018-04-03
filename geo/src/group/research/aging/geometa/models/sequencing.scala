@@ -38,11 +38,12 @@ import shapeless.{LabelledGeneric, _}
 
   lazy val asRecord = Sequencing_GSM.labeledGen.to(this)
   def asMap = asRecord.toMap
-  def asList = asRecord.toList
   def keys = asRecord.keys
-  def fieldNames = keys.toList.map(_.toString)
-  def asStringList = asList.map(_.toString)
+  def fieldNames = keys.toList.map(_.toString.replace("'", ""))
 
+  lazy val asGen = Sequencing_GSM.gen.to(this)
+  def asList = asGen.toList
+  def asStringList = asList.map(_.toString)
 }
 
 
@@ -50,7 +51,7 @@ object Sequencing_GSM {
 
   val labeledGen =  LabelledGeneric[Sequencing_GSM]
 
-  protected val gen = Generic[Sequencing_GSM]
+  val gen = Generic[Sequencing_GSM]
 
   def fromGSM(gsm: Tables.gsm, technology: String): Sequencing_GSM = {
     val record  = Tables.gsm.labeledGen.to(gsm)

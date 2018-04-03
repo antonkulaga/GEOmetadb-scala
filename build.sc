@@ -105,9 +105,9 @@ object web extends Module{
 	  override def repositories = super.repositories ++ resolvers
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
-		ivy"org.scala-js::scalajs-dom::0.9.4",
-		ivy"org.wvlet.airframe::airframe-log::0.41",
-        ivy"in.nvilla::monadic-html::0.4.0-RC1"
+			ivy"org.scala-js::scalajs-dom::0.9.4",
+			ivy"org.wvlet.airframe::airframe-log::0.41",
+      ivy"in.nvilla::monadic-html::0.4.0-RC1"
 	  )
 
 	 override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ plugins
@@ -116,8 +116,8 @@ object web extends Module{
 
 		override def sources = T.sources(
 			millSourcePath / "client" / src,
-            millSourcePath / src
-        )
+      millSourcePath / src
+		)
 
 		//override def runClasspath = T {
 		//	super.runClasspath().filterNot(_.path.last.contains("scala-xml"))

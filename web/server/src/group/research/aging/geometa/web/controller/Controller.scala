@@ -4,13 +4,22 @@ import com.typesafe.config.ConfigFactory
 import group.research.aging.geometa.GEOmeta
 import group.research.aging.geometa.models.Sequencing_GSM
 import group.research.aging.geometa.web.actions
+import group.research.aging.utils.SimpleSourceFormatter
 import io.getquill.{Literal, SqliteJdbcContext}
 import shapeless._
+import wvlet.log.LogFormatter.SourceCodeLogFormatter
+import wvlet.log.{LogLevel, LogSupport, Logger}
 
-object Controller {
+object Controller extends LogSupport{
+
+  // Set the default log formatter
+  Logger.setDefaultFormatter(SourceCodeLogFormatter)
+  Logger.setDefaultLogLevel(LogLevel.DEBUG)
 
 
   lazy val config = ConfigFactory.load().getConfig("quill-cache").getConfig("sqlite")
+
+
   lazy val ctx: SqliteJdbcContext[Literal.type] = new SqliteJdbcContext(Literal, config)
   lazy val db = new GEOmeta(ctx)
 

@@ -1,17 +1,31 @@
 package group.research.aging.geometa.web
 
+import group.research.aging.geometa.web.actions.ExplainedError
+import group.research.aging.utils.SimpleSourceFormatter
 import mhtml._
 import org.scalajs.dom
-import wvlet.log.LogSupport
+import wvlet.log.LogFormatter.SourceCodeLogFormatter
+import wvlet.log.{LogLevel, LogSupport, Logger}
 
 import scala.scalajs.js.annotation._
 import scala.util._
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 @JSExportTopLevel("MainJS")
-object MainJS extends LogSupport{
+object MainJS extends Base{
 
-  type Reducer = PartialFunction[(states.State, actions.Action), states.State]
+  // Set the default log formatter
+  Logger.setDefaultFormatter(SimpleSourceFormatter)
+  Logger.setDefaultLogLevel(LogLevel.DEBUG)
+
+  debug("MainJS STARTED!!!!!!")
+
+
+  val toLoad: Var[actions.ToLoad] = Var(actions.NothingToLoad)
+  val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
+  val throwError: Var[ExplainedError] = Var(ExplainedError.empty)
+
+  val allActions: Rx[actions.Action] = toLoad merge loaded merge throwError
 
   @JSExport
   def page(page: String, parameters: String*) = {
@@ -21,63 +35,57 @@ object MainJS extends LogSupport{
     toLoad := actions.LoadPage(page)
   }
 
-  val state: Rx[states.State] = Var(states.State.empty)
+  val state: Rx[states.State] = allActions.dropRepeats.foldp(states.State.empty){ case (s, a) => reducer(s, a)}
 
-  val headers = state.map(s=>s.headers)
+  val tableView = new TableView(state.map(s=>s.headers), state.map(s=> s.data))
+  val errorView = new ErrorsView(state.map(s=>s.errors))
 
-  val data = state.map(s=> s.data)
+  val component =
+    <div id="sequencing">
+      {  errorView.component  }
+      {  tableView.component }
+    </div>
 
-  val component= <table id="workflows" class="ui small blue striped celled table">
-    <thead>
-        { headers.map(h=> header(h)) }
-    </thead>
-    <tbody>
-      { data.map(d=> d.map(dataRow)) }
-    </tbody>
-  </table>
-
-  def header(row: List[String]) = <tr> {row.map(c=> <th>{c}</th>)} </tr>
-
-  def dataRow(row: List[String]) = <tr> {row.map(c=> <td>{c}</td>)} </tr>
-
-  val toLoad: Var[actions.ToLoad] = Var(
-    actions.NothingToLoad
-  )
-
-  val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
-
-  val allActions: Rx[actions.Action] = toLoad merge loaded merge loaded
-
-	import cats.effect.IO
-	import hammock.{Hammock, _}
-	import hammock.circe.implicits._
-	import hammock.js.Interpreter
-	import hammock.marshalling._
-	//import io.circe.generic.auto._
+  import cats.effect.IO
+  import hammock.{Hammock, _}
+  import hammock.circe.implicits._
+  import hammock.js.Interpreter
+  import hammock.marshalling._
+  //import io.circe.generic.auto._
 
   implicit val interpreter = Interpreter[IO]
 
 
-  val loadReducer: Reducer = {
+  lazy val loadReducer: Reducer = {
 
-    case (previous, actions.NothingToLoad) =>
-      previous
+    case (previous, actions.NothingToLoad) => previous
+    case (previous, ExplainedError.empty) => previous
+    case (previous, actions.NothingLoaded) => previous
 
     case (previous, actions.LoadPage(page)) =>
-      //toLoad :=
-      Hammock.request(Method.GET, uri"/view/${page}", Map.empty)
+      val u = Uri(path = s"/view/${page}")
+      Hammock.request(Method.GET, u, Map.empty)
         .as[actions.LoadedSequencing]
         .exec[IO].unsafeToFuture()
         .onComplete{
-          case Success(results) => loaded := results
-          case Failure(th) => error(th)
+          case Success(results) =>
+            loaded := results
+          case Failure(th) =>
+            error(th)
+            throwError := actions.ExplainedError(s"loading page ${page} with uri ${u} failed", th.getMessage)
         }
-      previous
+      previous.copy(page = page)
 
     case (previous, actions.LoadedSequencing( samples,  limit, offset)) =>
       val data_new: List[List[String]] = samples.map(s=>s.asStringList)
       val headers_new: List[String] = if(samples.isEmpty) Nil else samples.head.fieldNames
       previous.copy( "gsm", headers_new, data_new)
+  }
+
+  lazy val errorReducer: Reducer = {
+    case (previos, e: actions.ExplainedError) =>
+      error(e)
+      previos.copy(errors = e::previos.errors)
   }
 
   def onOther : Reducer = {
@@ -86,13 +94,17 @@ object MainJS extends LogSupport{
       previous
   }
 
+  lazy val onReduce: Reducer = loadReducer.orElse(errorReducer).orElse(onOther)
+
+
   // Compute the new state given an action and a previous state:
   // (I'm really not convinced by the name)
-  def reducer(previousState: states.State, action: actions.Action): states.State = loadReducer.orElse(onOther).apply(previousState, action)
+  def reducer(previousState: states.State, action: actions.Action): states.State = {
+    debug(action)
+    onReduce(previousState, action)
+  }
 
-  // The application State, probably initialize that from local store / DB
-  // updates could also be save on every update.
-  //val store: Rx[states.State] = allactions.foldp(states.DefaultState)(reducer)
+
   val div = dom.document.getElementById("main")
   mount(div, component)
 
