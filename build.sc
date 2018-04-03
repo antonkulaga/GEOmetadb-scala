@@ -98,8 +98,6 @@ object web extends Module{
 
 	  def scalaJSVersion = scala_js_version
 
-		override def mainClass = Some("group.research.aging.geometa.web.MainJS")
-
 	  override def moduleDeps = Seq(geo.js)
 
 	  override def repositories = super.repositories ++ resolvers
