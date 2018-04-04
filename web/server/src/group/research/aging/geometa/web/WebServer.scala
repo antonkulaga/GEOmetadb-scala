@@ -2,7 +2,9 @@ package group.research.aging.geometa.web
 
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.HttpApp
+import akka.http.scaladsl.model.headers.Authorization
+import akka.http.scaladsl.server.{HttpApp, RequestContext}
+import akka.http.scaladsl.server.directives.CachingDirectives
 import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import group.research.aging.geometa.GEOmeta
@@ -15,11 +17,20 @@ import wvlet.log.LogFormatter.SourceCodeLogFormatter
 import wvlet.log.{LogLevel, LogSupport, Logger}
 
 // Server definition
-object WebServer extends HttpApp with FailFastCirceSupport with LogSupport{
+object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with CachingDirectives {
 
   // Set the default log formatter
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
+
+  val simpleKeyer: PartialFunction[RequestContext, Uri] = {
+    val isGet: RequestContext ⇒ Boolean = _.request.method == HttpMethods.GET
+    val isAuthorized: RequestContext ⇒ Boolean = _.request.headers.exists(_.is(Authorization.lowercaseName))
+    val fun: PartialFunction[RequestContext, Uri]= {
+      case r: RequestContext if isGet(r) && !isAuthorized(r) ⇒ r.request.uri
+    }
+    fun
+  }
 
 
   def un(str: String) = scala.xml.Unparsed(str)
@@ -60,10 +71,33 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport{
 
   lazy val defaultLimit = 50
 
-  def view = (pathPrefix("view" / "gsm") | pathPrefix("view" / "sequencing")) { complete{
+  def view = pathPrefix("view" / "sequencing") { complete{
       Controller.loadSequencing(defaultLimit).asJson
     }
   }
+ /*
+
+  def bySpeciesTSV = pathPrefix("downloads" / "species" / Remaining ) { species =>
+    import kantan.csv._         // All kantan.csv types.
+    import kantan.csv.ops._     // Enriches types with useful methods.
+
+    Controller.bySpecies(species)
+  }
+
+ 
+  def species = cache(pathPrefix("view" / "gsm"), simpleKeyer) {
+    complete {
+      Controller.getAllSpecies()
+      ???
+    }
+  }
+
+  def species = cache(routeCache, simpleKeyer) {
+    complete {
+      Controller.getAllSpecies().toList.asJson
+    }
+  }
+  */
 
   override def routes =
     (pathSingleSlash |  path("index.html")) {

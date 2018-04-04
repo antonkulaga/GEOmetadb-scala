@@ -37,11 +37,15 @@ object MainJS extends Base{
 
   val state: Rx[states.State] = allActions.dropRepeats.foldp(states.State.empty){ case (s, a) => reducer(s, a)}
 
+  //val species: Rx
+
+  val queryView = new QueryView(state.map(s=>s.queryInfo))
   val tableView = new TableView(state.map(s=>s.headers), state.map(s=> s.data))
   val errorView = new ErrorsView(state.map(s=>s.errors))
 
   val component =
     <div id="sequencing">
+      {  queryView.component  }
       {  errorView.component  }
       {  tableView.component }
     </div>

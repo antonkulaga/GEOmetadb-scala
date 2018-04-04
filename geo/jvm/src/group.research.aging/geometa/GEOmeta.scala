@@ -34,6 +34,20 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
   }
 */
 
+  def sequencing_by_species(species: String, limit: Int = 0, offset: Int = 0)= {
+    val q = context.quote{
+      for {
+        sample <- query[Tables.gsm]
+        gpl <- query[Tables.gpl]
+        if sample.gpl == gpl.gpl
+        if sample.organism_ch1 == lift(species)
+        if gpl.technology == lift(technology)
+      } yield { (sample, gpl.title) }
+    }
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+  }
+
   def sequencing_gsm(limit: Int = 0, offset: Int = 0)= {
     val q = context.quote{
       for {
@@ -66,6 +80,14 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     }
     val platforms = context.run(q).map(get_sequencer)
     SortedSet(platforms:_*)
+  }
+
+  def all_species() = {
+    val q = context.quote{
+      query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct
+    }
+    val species = context.run(q)
+    SortedSet(species:_*)
   }
   
   def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {

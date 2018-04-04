@@ -7,18 +7,23 @@ import scala.collection.immutable._
 
 object State {
 
-  lazy val empty = State("none", Nil, Nil)
+  lazy val empty = State("none", Nil, Nil, QueryInfo.empty)
 
   lazy val test = State(
     "test", List("one", "two", "three"),  List(
       List("one_value1", "two_value1", "three_value1"),
       List("one_value2", "two_value2", "three_value2"),
       List("one_value3", "two_value3", "three_value3")
-    )
+    ), queryInfo = QueryInfo.empty
   )
 }
 
-@JsonCodec case class State (page: String, headers: List[String], data: List[List[String]], errors: List[ExplainedError] = Nil)
+object QueryInfo{
+  lazy val empty = QueryInfo(Nil)
+}
+@JsonCodec case class QueryInfo(species: List[String])
+
+@JsonCodec case class State (page: String, headers: List[String], data: List[List[String]], queryInfo: QueryInfo, errors: List[ExplainedError] = Nil)
 
 
 /*

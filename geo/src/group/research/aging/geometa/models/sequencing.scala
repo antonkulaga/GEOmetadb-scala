@@ -1,12 +1,12 @@
 package group.research.aging.geometa.models
 
-import group.research.aging.geometa.Tables
+import group.research.aging.geometa.{StringId, Tables}
 import group.research.aging.util.NotNull
 import io.circe.generic.JsonCodec
 import shapeless.record._
 import shapeless.syntax.singleton._
 import shapeless.{LabelledGeneric, _}
-
+import model.persistence.HasId
 
 @JsonCodec case class Sequencing_GSM(
                                       ID: String,
@@ -34,7 +34,7 @@ import shapeless.{LabelledGeneric, _}
                                       data_row_count: Double,
                                       channel_count: Double,
                                       sequencer: String
-                                    ) {
+                                    ) extends StringId[Sequencing_GSM]{
 
   lazy val asRecord = Sequencing_GSM.labeledGen.to(this)
   def asMap = asRecord.toMap

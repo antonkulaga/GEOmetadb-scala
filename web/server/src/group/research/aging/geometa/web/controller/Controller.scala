@@ -34,4 +34,12 @@ object Controller extends LogSupport{
     //actions
   }
 
+  def bySpecies(species: String) = {
+    db.sequencing_by_species(species)
+  }
+
+  def getAllSpecies() = {
+    db.all_species()
+  }
+
 }

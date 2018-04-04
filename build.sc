@@ -16,7 +16,9 @@ val src = "src"
 val resolvers =  Seq(
   MavenRepository("https://oss.sonatype.org/content/repositories/releases"),
   MavenRepository("https://bintray.com/hseeberger/maven"),
-  MavenRepository("http://dl.bintray.com/micronautics/scala")
+  MavenRepository("http://dl.bintray.com/micronautics/scala"),
+  MavenRepository("https://dl.bintray.com/denigma/denigma-releases"),
+  MavenRepository("https://dl.bintray.com/comp-bio-aging/main")
 )
 
 val plugins = Agg(ivy"org.scalamacros:::paradise:2.1.1")
@@ -91,6 +93,9 @@ object web extends Module{
     ivy"com.pepegar::hammock-circe::0.8.3",
     ivy"com.github.japgolly.scalacss::core::0.5.5",
     ivy"org.wvlet.airframe::airframe-log::0.41",
+	ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
+	ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
+	ivy"group.research.aging::cromwell-client::0.0.13"
   )
 
 	object client extends ScalaJSModule {
@@ -133,6 +138,7 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 			ivy"io.getquill::quill:2.3.3",
+			ivy"com.micronautics::quill-cache:3.5.9",
 			ivy"com.typesafe.akka::akka-stream:2.5.11",
 			ivy"com.typesafe.akka::akka-http:10.1.0",
 			ivy"com.typesafe.akka::akka-http-xml:10.1.0",
