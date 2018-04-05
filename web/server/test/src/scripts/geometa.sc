@@ -5,14 +5,49 @@ import $ivy.`org.postgresql:postgresql:9.4.1208`
 import $ivy.`io.getquill::quill-jdbc:2.3.3`
 import $ivy.`com.lihaoyi::pprint:0.5.3`
 import $ivy.`com.chuusai::shapeless:2.3.3`
+import $ivy.`io.circe::circe-core:0.9.3`
+import $ivy.`io.circe::circe-generic:0.9.3`
+import $ivy.`io.circe::circe-generic-extras:0.9.3`
+import $ivy.`io.circe::circe-parser:0.9.3`
+
 import io.getquill.Embedded
 import shapeless._
 import record._
 import ops.record._
 import syntax.singleton._
+import io.circe.generic.JsonCodec
+import shapeless.record._
+import shapeless.syntax.singleton._
+import shapeless.{LabelledGeneric, _}
 
+
+import shapeless.Poly1
+
+object NotNull extends Poly1 {
+
+  implicit val intCase: Case.Aux[Int, Int] =
+    at[Int](v => v)
+
+  implicit val longCase: Case.Aux[Long, Long] =
+    at[Long](v => v)
+
+
+  implicit val doubleCase: Case.Aux[Double, Double] =
+    at[Double](v => if(v == Double.NaN) 0.0 else v)
+
+  implicit val stringCase: Case.Aux[String, String] =
+    at[String](v => if(v==null || v == "null") "" else v)
+
+}
+
+
+trait StringId[T] {//extends HasId[T, String] {
+  def ID: String
+  //lazy val id: model.persistence.Id[String] = model.persistence.Id(ID)
+}
 
 object Tables {
+
 
   case class gse
   (
@@ -34,7 +69,15 @@ object Tables {
     variable: String, //Variable	variable	text	variable type, e.g. dose, time, tissue, strain, gender, cell line, development stage, age, agent, cell type, infection, isolate, metabolism, shock, stress, temperature, specimen, disease state, protocol, growth protocol, genotype/variation, species, individual, or other. For example:
     variable_description: String, //Variable Description	variable_description	text	description of a variable type
     supplementary_file: String, //Supplementary	supplementary_file	text	ftp link to NCBI GEO supplementary file(s) of this GSE
-  )
+    /*
+    SOFT FTP†	 	 	ftp link to NCBI GEO SOFT format of this GSE
+    SeriesMatrix FTP†	 	 	ftp link to NCBI GEO SOFT format of the Series Matrix
+    GPL Acc	 	 	GPLs separated by comma
+    GPL Count	 	 	number of GPLs
+    GSM Acc	 	 	GSMs separated by comma
+    GSM Count	 	 	number of GSMs
+    */
+  ) //extends DoubleId[gse]
 
   case class gpl(
                   ID: Double,
@@ -57,20 +100,23 @@ object Tables {
                   data_row_count: Double,
                   supplementary_file: String,
                   bioc_package: String
-                )
+                ) //extends DoubleId[gpl]
 
-  case class Ch2(source_name_ch2: String,
-                 organism_ch2: String,
-                 characteristics_ch2: String,
-                 molecule_ch2: String,
-                 label_ch2: String,
-                 treatment_protocol_ch2: String,
-                 extract_protocol_ch2: String,
-                 label_protocol_ch2: String) extends Embedded
+
+  trait Ch2 {
+    def source_name_ch2: String
+    def organism_ch2: String
+    def characteristics_ch2: String
+    def molecule_ch2: String
+    def label_ch2: String
+    def treatment_protocol_ch2: String
+    def extract_protocol_ch2: String
+    def label_protocol_ch2: String
+  }
+
 
   object gsm {
-    implicit  val labeled =  LabelledGeneric[gsm]
-
+    val labeledGen = LabelledGeneric[Tables.gsm]
   }
 
   case class gsm(
@@ -91,7 +137,14 @@ object Tables {
                   treatment_protocol_ch1: String,
                   extract_protocol_ch1: String,
                   label_protocol_ch1: String,
-                  ch2: Ch2,
+                  source_name_ch2: String,
+                  organism_ch2: String,
+                  characteristics_ch2: String,
+                  molecule_ch2: String,
+                  label_ch2: String,
+                  treatment_protocol_ch2: String,
+                  extract_protocol_ch2: String,
+                  label_protocol_ch2: String,
                   hyb_protocol: String,
                   description: String,
                   data_processing: String,
@@ -99,7 +152,8 @@ object Tables {
                   supplementary_file: String,
                   data_row_count: Double,
                   channel_count: Double,
-                )
+                ) extends Ch2 with StringId[gsm]
+
 
   case class gds(
                   ID: String,
@@ -120,50 +174,70 @@ object Tables {
                   gse: String,
                   order: String,
                   update_date: String
-                )
+                ) extends StringId[gds]
+
+  case class gse_gsm(gse: String, gsm: String)
+  case class gse_gpl(gse: String, gpl: String)
+
 }
 
 case class Sequencing_GSM(
-                           ID: String,
-                           title: String,
-                           gsm: String,
-                           series_id: String,
-                           gpl: String,
-                           status: String,
-                           submission_date: String,
-                           last_update_date: String,
-                           `type`: String,
-                           source_name_ch1: String,
-                           organism_ch1: String,
-                           characteristics_ch1: String,
-                           molecule_ch1: String,
-                           //label_ch1: String,
-                           treatment_protocol_ch1: String,
-                           extract_protocol_ch1: String,
-                           //label_protocol_ch1: String,
-                           //hyb_protocol: String,
-                           description: String,
-                           data_processing: String,
-                           contact: String,
-                           //supplementary_file: String,
-                           data_row_count: Double,
-                           channel_count: Double,
-                           sequencer: String
-                         )
+                                      ID: String,
+                                      title: String,
+                                      gsm: String,
+                                      series_id: String,
+                                      gpl: String,
+                                      status: String,
+                                      submission_date: String,
+                                      last_update_date: String,
+                                      `type`: String,
+                                      source_name_ch1: String,
+                                      organism_ch1: String,
+                                      characteristics_ch1: String,
+                                      molecule_ch1: String,
+                                      //label_ch1: String,
+                                      treatment_protocol_ch1: String,
+                                      extract_protocol_ch1: String,
+                                      //label_protocol_ch1: String,
+                                      //hyb_protocol: String,
+                                      description: String,
+                                      data_processing: String,
+                                      contact: String,
+                                      //supplementary_file: String,
+                                      data_row_count: Double,
+                                      channel_count: Double,
+                                      sequencer: String
+                                    ) extends StringId[Sequencing_GSM]{
+
+  lazy val asRecord = Sequencing_GSM.labeledGen.to(this)
+  def asMap = asRecord.toMap
+  def keys = asRecord.keys
+  def fieldNames = keys.toList.map(_.toString.replace("'", ""))
+
+  lazy val asGen = Sequencing_GSM.gen.to(this)
+  def asList = asGen.toList
+  def asStringList = asList.map(_.toString)
+}
 
 
 object Sequencing_GSM {
 
+  val labeledGen =  LabelledGeneric[Sequencing_GSM]
 
-  val fromGen =  LabelledGeneric[Tables.gsm]
-  val toGen =  LabelledGeneric[Sequencing_GSM]
+  val gen = Generic[Sequencing_GSM]
 
   def fromGSM(gsm: Tables.gsm, technology: String): Sequencing_GSM = {
-    val recSmall = (fromGen.to(gsm) - 'ch2) - 'hyb_protocol - 'label_protocol_ch1 - 'label_ch1 - 'supplementary_file
-    //val recTec = rec + ('sequencer ->> technology)
-    toGen.from(recSmall + ('sequencer ->> technology))
+    val record  = Tables.gsm.labeledGen.to(gsm)
+    val recSmall = (record - 'source_name_ch2 -'organism_ch2 -
+      'characteristics_ch2 - 'molecule_ch2 - 'label_ch2 -
+      'treatment_protocol_ch2 - 'extract_protocol_ch2 -'label_protocol_ch2) -
+      'hyb_protocol - 'label_protocol_ch1 - 'label_ch1 - 'supplementary_file
+    val recNew = recSmall + ('sequencer ->> technology)
+    val r = labeledGen.from(recNew)
+    gen.from(gen.to(r).map(NotNull))
   }
 
-  def asMap(seq_gsm: Sequencing_GSM) = toGen.to(seq_gsm).toMap
+
+  def asMap(seq_gsm: Sequencing_GSM) = labeledGen.to(seq_gsm).toMap
 
 }

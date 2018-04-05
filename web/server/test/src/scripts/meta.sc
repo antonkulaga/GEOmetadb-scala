@@ -1,18 +1,18 @@
-import java.io.File
-
 import $exec.geometa
+
+import java.io.File
+import com.typesafe.config.ConfigFactory
 import geometa._
-import com.typesafe.config.ConfigValueFactory
-import com.typesafe.config.{Config, ConfigFactory}
-import io.getquill._
+
+//import group.research.aging.geometa.models._
 import io.getquill.context.jdbc.JdbcContext
-import shapeless._
-
-
+import io.getquill._
 import scala.collection.immutable.SortedSet
 
-val config = ConfigFactory.parseFile(new File("/pipelines/sources/GEOmetadb-scala/GEOmetadb/resources/application.conf"))
-  .getConfig("quill-cache.sqlite")
+import scala.collection.immutable._
+//import wvlet.log.{LogLevel, LogSupport, Logger}
+
+val config = ConfigFactory.parseFile(new File("/pipelines/sources/GEOmetadb-scala/web/server/resources/application.conf")).getConfig("quill-cache.sqlite")
 
 class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
   import context._
@@ -34,26 +34,46 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
 		 gsm.organism_ch1= 'Caenorhabditis elegans');"
     */
 
+  /*
+    def limited[T](q: context.Quoted[context.Query[T]], limit: Int = 0, offset: Int = 0) = {
+      if(limit>=0) q.drop(lift(offset)).take(lift(limit))  else  q.drop(lift(offset))
+    }
+  */
 
-  def sequencing_gsm(limit: Int)= {
+  def sequencing_by_species(species: String, limit: Int = 0, offset: Int = 0)= {
     val q = context.quote{
-      val results = for {
+      for {
+        sample <- query[Tables.gsm]
+        gpl <- query[Tables.gpl]
+        if sample.gpl == gpl.gpl
+        if sample.organism_ch1 == lift(species)
+        if gpl.technology == lift(technology)
+      } yield { (sample, gpl.title) }
+    }
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+  }
+
+  def sequencing_gsm(limit: Int = 0, offset: Int = 0)= {
+    val q = context.quote{
+      for {
         sample <- query[Tables.gsm]
         gpl <- query[Tables.gpl]
         if sample.gpl == gpl.gpl
         if gpl.technology == lift(technology)
       } yield { (sample, gpl.title) }
-      results.take(lift(limit))
     }
-    context.run(q).map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+    println(q.ast)
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
   }
 
 
-  def gsm(limit: Int): List[Tables.gsm] = {
+  def gsm(limit: Int = 0, offset: Int = 0): List[Tables.gsm] = {
     val q = context.quote{
-      query[Tables.gsm].take(lift(limit))
+      query[Tables.gsm]
     }
-    context.run(q)
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
   }
 
   def get_sequencer(n: String): String =  n.indexOf(" (") match {
@@ -69,86 +89,18 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     SortedSet(platforms:_*)
   }
 
-  //Homo sapiens	Mus musculus	Rattus norvegicus	Drosophila melanogaster	Caenorhabditis elegans
-  def count_molecule_aged() = {
+  def all_species() = {
     val q = context.quote{
-      val results = for {
-        sample <- query[Tables.gsm]
-        gpl <- query[Tables.gpl]
-        if sample.gpl == gpl.gpl
-        if gpl.technology == lift(technology)
-        if sample.organism_ch1 !=null
-        if sample.characteristics_ch1.toLowerCase like "%age%"
-        //gfif sample.characteristics_ch1.toLowerCase like "%tissue%"
-        //if sample.molecule_ch1 !=null
-      } yield (sample.organism_ch1, sample.molecule_ch1)
-      results
+      query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct
     }
-    val r = context.run(q)
-    r.groupBy(r=> r).map{ case ((o, m), g) => (o, m, g.size) }.toList.sortBy(_._1)
+    context.run(q).toList
   }
 
-  def count_molecule() = {
+  def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {
     val q = context.quote{
-      val results = for {
-        sample <- query[Tables.gsm]
-        gpl <- query[Tables.gpl]
-        if sample.gpl == gpl.gpl
-        if gpl.technology == lift(technology)
-        if sample.organism_ch1 !=null
-        //if sample.molecule_ch1 !=null
-      } yield (sample.organism_ch1, sample.molecule_ch1)
-      results
+      query[Tables.gpl].filter(g=>g.technology == lift(technology))
     }
-    val r = context.run(q)
-    r.groupBy(r=> r).map{ case ((o, m), g) => (o, m, g.size) }.toList.sortBy(_._1)
-  }
-
-  def all_field() = {
-    val q = context.quote{
-      val results = for {
-        sample <- query[Tables.gsm]
-        gpl <- query[Tables.gpl]
-        if sample.gpl == gpl.gpl
-        if gpl.technology == lift(technology)
-        //if sample.supplementary_file != null
-        if sample.treatment_protocol_ch1 != null
-      } yield { sample.treatment_protocol_ch1 }
-      results.distinct
-    }
-    val results = context.run(q)
-    SortedSet(results:_*)
-  }
-
-
-
-  def gpl(limit: Int): List[Tables.gpl] = {
-    val q = context.quote{
-      query[Tables.gpl].filter(g=>g.technology == lift(technology)).take(lift(limit))
-    }
-    context.run(q)
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
   }
 
 }
-
-lazy val ctx: SqliteJdbcContext[Literal.type] = new SqliteJdbcContext(Literal, config)
-import ctx._
-val geo = new GEOmeta(ctx)
-
-
-println("==============")
-//for(e <- geo.sequencing_gsm(50)) println(Sequencing_GSM.asMap(e))
-//println("==============")
-//for(e <- geo.sequencing_gsm(250)) println(e.characteristics_ch1)
-//geo.count_molecule_aged().foreach(println)
-//geo.count_molecule_aged_tissue().foreach(println)
-geo.all_field().foreach(println)
-println("///////////////")
-
-//Sqlite.columns("gpl")(ctx).foreach(println)
-//Sqlite.columns("gse_gpl")(ctx).foreach(println)
-//Sqlite.columns("gse_gsm")(ctx).foreach(println)
-//geo.sequencing_gsm(30).foreach(println(_))//(pprint.pprintln(_))
-//geo.all_gpls().foreach(println)
-//geo.all_sequencers().foreach(println)
-//geo.all_species().foreach(println)

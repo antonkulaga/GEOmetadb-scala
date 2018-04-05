@@ -16,11 +16,10 @@ object Controller extends LogSupport{
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
 
-
   lazy val config = ConfigFactory.load().getConfig("quill-cache").getConfig("sqlite")
 
-
   lazy val ctx: SqliteJdbcContext[Literal.type] = new SqliteJdbcContext(Literal, config)
+
   lazy val db = new GEOmeta(ctx)
 
   def getSamples(limit: Long = 0, offset: Long = 0) = {
@@ -40,6 +39,10 @@ object Controller extends LogSupport{
 
   def getAllSpecies() = {
     db.all_species()
+  }
+
+  def getAllPlatforms() = {
+    db.all_sequencers().toList
   }
 
 }

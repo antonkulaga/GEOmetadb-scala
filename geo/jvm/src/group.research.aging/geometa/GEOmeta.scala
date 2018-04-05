@@ -1,12 +1,13 @@
 package group.research.aging.geometa
 
 import io.getquill.{Literal, SqliteJdbcContext}
-
 import shapeless._
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
+
 import scala.collection.immutable._
 import group.research.aging.geometa.models._
+//import wvlet.log.{LogLevel, LogSupport, Logger}
 
 class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
   import context._
@@ -57,6 +58,7 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
         if gpl.technology == lift(technology)
       } yield { (sample, gpl.title) }
     }
+    println(q.ast)
     val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
     results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
   }
@@ -86,8 +88,7 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     val q = context.quote{
       query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct
     }
-    val species = context.run(q)
-    SortedSet(species:_*)
+    context.run(q).toList
   }
   
   def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {

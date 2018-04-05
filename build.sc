@@ -31,12 +31,13 @@ object geo extends Module {
 
   def geo_ivy_deps = Agg(
     ivy"com.lihaoyi::pprint:0.5.3",
-    ivy"com.chuusai::shapeless:2.3.3",
+    iv
     ivy"io.circe::circe-core:0.9.3",
     ivy"io.circe::circe-generic:0.9.3",
     ivy"io.circe::circe-generic-extras:0.9.3",
-    ivy"io.circe::circe-parser:0.9.3"
-  )
+    ivy"io.circe::circe-parser:0.9.3",
+		ivy"org.wvlet.airframe::airframe-log::0.41"
+	)
 
   object js extends ScalaJSModule {
     def scalaVersion = scala_version
@@ -74,7 +75,6 @@ object geo extends Module {
       ivy"com.kailuowang::henkan-convert:0.6.1",
       ivy"com.kailuowang::henkan-optional:0.6.1",
       ivy"com.micronautics::quill-cache:3.5.9",
-      ivy"ch.qos.logback:logback-classic:1.2.3",
       ivy"io.getquill::quill-jdbc:2.3.3"
     )
 
@@ -92,10 +92,10 @@ object web extends Module{
     ivy"com.pepegar::hammock-core::0.8.3",
     ivy"com.pepegar::hammock-circe::0.8.3",
     ivy"com.github.japgolly.scalacss::core::0.5.5",
-    ivy"org.wvlet.airframe::airframe-log::0.41",
-	ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
-	ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
-	ivy"group.research.aging::cromwell-client::0.0.13"
+		ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
+		ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
+		ivy"group.research.aging::cromwell-client::0.0.13",
+    ivy"io.lemonlabs::scala-uri::1.1.1"
   )
 
 	object client extends ScalaJSModule {
@@ -111,7 +111,6 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 			ivy"org.scala-js::scalajs-dom::0.9.4",
-			ivy"org.wvlet.airframe::airframe-log::0.41",
       ivy"in.nvilla::monadic-html::0.4.0-RC1"
 	  )
 

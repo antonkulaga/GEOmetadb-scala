@@ -1,5 +1,6 @@
 package group.research.aging.geometa.web
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Authorization
@@ -13,11 +14,16 @@ import group.research.aging.utils.SimpleSourceFormatter
 import io.getquill.{Literal, SqliteJdbcContext}
 import scalacss.DevDefaults._
 import io.circe.syntax._
+import kantan.csv.{CsvConfiguration, rfc}
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
 import wvlet.log.{LogLevel, LogSupport, Logger}
+import group.research.aging.util.PercentDecoder._
 
 // Server definition
 object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with CachingDirectives {
+
+  implicit val cacheSystem = ActorSystem("cacheSystem")
+
 
   // Set the default log formatter
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
@@ -31,6 +37,8 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     }
     fun
   }
+
+  implicit val tsvConfig: CsvConfiguration = rfc.withCellSeparator('\t').withHeader(true)
 
 
   def un(str: String) = scala.xml.Unparsed(str)
@@ -66,25 +74,39 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   }
 
   def pages =  pathPrefix("pages" / Remaining) { page =>
-    complete(loadPage(page))
+    complete(loadPage(page.decode))
   }
 
   lazy val defaultLimit = 50
 
-  def view = pathPrefix("view" / "sequencing") { complete{
+  def view = cache(routeCache, simpleKeyer){pathPrefix("view" / "sequencing") { complete{
       Controller.loadSequencing(defaultLimit).asJson
+      }
     }
   }
- /*
 
-  def bySpeciesTSV = pathPrefix("downloads" / "species" / Remaining ) { species =>
-    import kantan.csv._         // All kantan.csv types.
-    import kantan.csv.ops._     // Enriches types with useful methods.
-
-    Controller.bySpecies(species)
+  def download = cache(routeCache, simpleKeyer){pathPrefix("downloads"){
+      pathPrefix("species" / Remaining ){ species =>
+        import kantan.csv._         // All kantan.csv types.
+        import kantan.csv.ops._     // Enriches types with useful methods.
+        import kantan.csv.generic._
+        debug(species)
+        val str = Controller.bySpecies(species.decode).asCsv(tsvConfig)
+        complete(str)
+      }
+    }
   }
 
- 
+  def suggest = cache(routeCache, simpleKeyer){
+    pathPrefix("suggest"){
+      path("species") {
+        complete { Controller.getAllSpecies().asJson }
+      } ~ path("platforms"){
+        complete { Controller.getAllSpecies().asJson }
+      }
+    }
+  }
+  /*
   def species = cache(pathPrefix("view" / "gsm"), simpleKeyer) {
     complete {
       Controller.getAllSpecies()
@@ -104,8 +126,8 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
       complete(loadPage("sequencing"))
     } ~ mystyles ~
       pathPrefix("pages" / Remaining) { page =>
-      complete(loadPage(page))
-    } ~ view ~
+      complete(loadPage(page.decode))
+    } ~ view ~ download ~ suggest ~
       path("public" / Segment){ name =>
         getFromResource(name.toString)
       }

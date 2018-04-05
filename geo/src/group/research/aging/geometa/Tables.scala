@@ -136,8 +136,6 @@ object Tables {
   case class gse_gsm(gse: String, gsm: String)
   case class gse_gpl(gse: String, gpl: String)
 
-
-
 }
 
 trait StringId[T] extends HasId[T, String] {
