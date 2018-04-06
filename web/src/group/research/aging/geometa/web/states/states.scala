@@ -19,9 +19,9 @@ object State {
 }
 
 object QueryInfo{
-  lazy val empty = QueryInfo(Nil)
+  lazy val empty = QueryInfo(Nil, Nil)
 }
-@JsonCodec case class QueryInfo(species: List[String])
+@JsonCodec case class QueryInfo(species: List[String], platforms: List[String])
 
 @JsonCodec case class State (page: String, headers: List[String], data: List[List[String]], queryInfo: QueryInfo, errors: List[ExplainedError] = Nil)
 

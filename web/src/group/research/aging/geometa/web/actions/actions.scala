@@ -19,6 +19,11 @@ object LoadPage {
 
 @JsonCodec case class LoadPage(name: String) extends ToLoad
 
+object Search{
+  lazy val empty = Search(Map.empty)
+}
+@JsonCodec case class Search(parameters: Map[String, String]) extends ToLoad
+
 //case class Error(throwable: Throwable) extends Action
 
 object ExplainedError {

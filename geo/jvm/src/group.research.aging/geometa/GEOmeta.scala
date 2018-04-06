@@ -9,7 +9,7 @@ import scala.collection.immutable._
 import group.research.aging.geometa.models._
 //import wvlet.log.{LogLevel, LogSupport, Logger}
 
-class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
+class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type]) {
   import context._
 
   lazy val technology: String = "high-throughput sequencing"
@@ -45,8 +45,8 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
         if gpl.technology == lift(technology)
       } yield { (sample, gpl.title) }
     }
-    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
-    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
+    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}.sortBy(g=>g.molecule_ch1)
   }
 
   def sequencing_gsm(limit: Int = 0, offset: Int = 0)= {
@@ -58,8 +58,7 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
         if gpl.technology == lift(technology)
       } yield { (sample, gpl.title) }
     }
-    println(q.ast)
-    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
     results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
   }
 
@@ -68,7 +67,7 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     val q = context.quote{
       query[Tables.gsm]
     }
-    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
   }
 
   def get_sequencer(n: String): String =  n.indexOf(" (") match {
@@ -95,7 +94,7 @@ class GEOmeta(context: JdbcContext[SqliteDialect, Literal.type]) {
     val q = context.quote{
       query[Tables.gpl].filter(g=>g.technology == lift(technology))
     }
-    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
+    if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
   }
 
 }

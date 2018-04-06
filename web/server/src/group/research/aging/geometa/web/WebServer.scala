@@ -90,9 +90,10 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
         import kantan.csv._         // All kantan.csv types.
         import kantan.csv.ops._     // Enriches types with useful methods.
         import kantan.csv.generic._
-        debug(species)
-        val str = Controller.bySpecies(species.decode).asCsv(tsvConfig)
-        complete(str)
+        val tsv = Controller.bySpecies(species.decode).asCsv(this.tsvConfig)
+        complete(
+          HttpEntity(ContentTypes.`text/csv(UTF-8)`,tsv)
+        )
       }
     }
   }

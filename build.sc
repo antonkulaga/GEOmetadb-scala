@@ -31,7 +31,6 @@ object geo extends Module {
 
   def geo_ivy_deps = Agg(
     ivy"com.lihaoyi::pprint:0.5.3",
-    iv
     ivy"io.circe::circe-core:0.9.3",
     ivy"io.circe::circe-generic:0.9.3",
     ivy"io.circe::circe-generic-extras:0.9.3",

@@ -39,7 +39,7 @@ object MainJS extends Base{
 
   //val species: Rx
 
-  val queryView = new QueryView(state.map(s=>s.queryInfo))
+  val queryView = new QueryView(state.map(s=>s.queryInfo), toLoad)
   val tableView = new TableView(state.map(s=>s.headers), state.map(s=> s.data))
   val errorView = new ErrorsView(state.map(s=>s.errors))
 
@@ -80,10 +80,10 @@ object MainJS extends Base{
         }
       previous.copy(page = page)
 
-    case (previous, actions.LoadedSequencing( samples,  limit, offset)) =>
+    case (previous, actions.LoadedSequencing( queryInfo, samples,  limit, offset)) =>
       val data_new: List[List[String]] = samples.map(s=>s.asStringList)
       val headers_new: List[String] = if(samples.isEmpty) Nil else samples.head.fieldNames
-      previous.copy( "gsm", headers_new, data_new)
+      previous.copy( "gsm", headers_new, data_new, queryInfo = queryInfo)
   }
 
   lazy val errorReducer: Reducer = {

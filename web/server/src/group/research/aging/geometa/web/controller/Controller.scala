@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import group.research.aging.geometa.GEOmeta
 import group.research.aging.geometa.models.Sequencing_GSM
 import group.research.aging.geometa.web.actions
+import group.research.aging.geometa.web.states.QueryInfo
 import group.research.aging.utils.SimpleSourceFormatter
 import io.getquill.{Literal, SqliteJdbcContext}
 import shapeless._
@@ -29,7 +30,10 @@ object Controller extends LogSupport{
 
   def loadSequencing(limit: Long = 0, offset: Long = 0) = {
     val gsms = getSamples(limit)
-    actions.LoadedSequencing(gsms, limit, offset)
+    val species = getAllSpecies()
+    val platforms = db.all_sequencers()
+    val query = QueryInfo(species, platforms.toList)
+    actions.LoadedSequencing(query, gsms, limit, offset)
     //actions
   }
 
@@ -38,7 +42,7 @@ object Controller extends LogSupport{
   }
 
   def getAllSpecies() = {
-    db.all_species()
+    db.all_species().flatMap(s=>s.split("\t").map(_.trim)).distinct
   }
 
   def getAllPlatforms() = {
