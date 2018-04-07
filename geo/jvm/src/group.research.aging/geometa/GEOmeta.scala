@@ -46,10 +46,10 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type]) {
       } yield { (sample, gpl.title) }
     }
     val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
-    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}.sortBy(g=>g.molecule_ch1)
+    results.map{ case (sample, title) => Sequencing.fromGSM(sample, get_sequencer(title))}.sortBy(g=>g.molecule_ch1)
   }
 
-  def sequencing_gsm(limit: Int = 0, offset: Int = 0)= {
+  def sequencing(limit: Int = 0, offset: Int = 0)= {
     val q = context.quote{
       for {
         sample <- query[Tables.gsm]
@@ -59,7 +59,7 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type]) {
       } yield { (sample, gpl.title) }
     }
     val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
-    results.map{ case (sample, title) => Sequencing_GSM.fromGSM(sample, get_sequencer(title))}
+    results.map{ case (sample, title) => Sequencing.fromGSM(sample, get_sequencer(title))}
   }
 
 

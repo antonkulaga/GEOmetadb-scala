@@ -1,13 +1,12 @@
-package group.research.aging.geometa.web
+package group.research.aging.geometa.web.tables
 
-import group.research.aging.geometa.web.actions.LoadedSequencing
+import group.research.aging.geometa.web.Base
 import mhtml.Rx
 
 import scala.xml.Elem
 
-class SequencingView(loadedSequencing: Rx[LoadedSequencing]) extends Base {
+class TableView(headers: Rx[List[String]], data: Rx[List[List[String]]]) extends Base {
 
-  /*
   val component: Elem = <table id="workflows" class="ui small blue striped celled table">
     <thead>
       { headers.map(h=> header(h)) }
@@ -16,7 +15,6 @@ class SequencingView(loadedSequencing: Rx[LoadedSequencing]) extends Base {
       { data.map(d=> d.map(dataRow)) }
     </tbody>
   </table>
-  */
 
   protected def header(row: List[String]) = <tr> {row.map(c=> <th>{c}</th>)} </tr>
 

@@ -1,6 +1,6 @@
 package group.research.aging.geometa.web
 
-import group.research.aging.geometa.web.actions.ExplainedError
+import group.research.aging.geometa.web.samples.{SamplesQueryView, SamplesView}
 import group.research.aging.utils.SimpleSourceFormatter
 import mhtml._
 import org.scalajs.dom
@@ -23,7 +23,8 @@ object MainJS extends Base{
 
   val toLoad: Var[actions.ToLoad] = Var(actions.NothingToLoad)
   val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
-  val throwError: Var[ExplainedError] = Var(ExplainedError.empty)
+  val throwError: Var[actions.ExplainedError] = Var(actions.ExplainedError.empty)
+  val updateUI: Var[actions.UpdateUI] = Var(actions.NotUpdateUI)
 
   val allActions: Rx[actions.Action] = toLoad merge loaded merge throwError
 
@@ -39,15 +40,14 @@ object MainJS extends Base{
 
   //val species: Rx
 
-  val queryView = new QueryView(state.map(s=>s.queryInfo), toLoad)
-  val tableView = new TableView(state.map(s=>s.headers), state.map(s=> s.data))
+  val samplesView = new SamplesView(state.map(s=>s.sequencing), toLoad, updateUI)
   val errorView = new ErrorsView(state.map(s=>s.errors))
+  //{  tableView.component }
 
   val component =
     <div id="sequencing">
-      {  queryView.component  }
       {  errorView.component  }
-      {  tableView.component }
+      {  samplesView.component }
     </div>
 
   import cats.effect.IO
@@ -63,7 +63,7 @@ object MainJS extends Base{
   lazy val loadReducer: Reducer = {
 
     case (previous, actions.NothingToLoad) => previous
-    case (previous, ExplainedError.empty) => previous
+    case (previous, actions.ExplainedError.empty) => previous
     case (previous, actions.NothingLoaded) => previous
 
     case (previous, actions.LoadPage(page)) =>
@@ -80,16 +80,24 @@ object MainJS extends Base{
         }
       previous.copy(page = page)
 
-    case (previous, actions.LoadedSequencing( queryInfo, samples,  limit, offset)) =>
-      val data_new: List[List[String]] = samples.map(s=>s.asStringList)
-      val headers_new: List[String] = if(samples.isEmpty) Nil else samples.head.fieldNames
-      previous.copy( "gsm", headers_new, data_new, queryInfo = queryInfo)
+    case (previous, seq: actions.LoadedSequencing) =>
+      //val data_new: List[List[String]] = samples.map(s=>s.asStringList)
+      //val headers_new: List[String] = if(samples.isEmpty) Nil else samples.head.fieldNames
+      //previous.copy( "gsm", headers_new, data_new, queryInfo = queryInfo)
+      previous.copy(sequencing = seq)
+  }
+
+
+  lazy val UIReducer: Reducer = {
+    case (previous, actions.EvalJS(code)) =>
+      scalajs.js.eval(code)
+      previous
   }
 
   lazy val errorReducer: Reducer = {
-    case (previos, e: actions.ExplainedError) =>
+    case (previous, e: actions.ExplainedError) =>
       error(e)
-      previos.copy(errors = e::previos.errors)
+      previous.copy(errors = e::previous.errors)
   }
 
   def onOther : Reducer = {
@@ -98,7 +106,7 @@ object MainJS extends Base{
       previous
   }
 
-  lazy val onReduce: Reducer = loadReducer.orElse(errorReducer).orElse(onOther)
+  lazy val onReduce: Reducer = loadReducer.orElse(errorReducer).orElse(UIReducer).orElse(onOther)
 
 
   // Compute the new state given an action and a previous state:

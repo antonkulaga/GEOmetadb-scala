@@ -2,9 +2,9 @@ package group.research.aging.geometa.web.controller
 
 import com.typesafe.config.ConfigFactory
 import group.research.aging.geometa.GEOmeta
-import group.research.aging.geometa.models.Sequencing_GSM
+import group.research.aging.geometa.models.Sequencing
 import group.research.aging.geometa.web.actions
-import group.research.aging.geometa.web.states.QueryInfo
+import group.research.aging.geometa.web.states.SamplesQueryInfo
 import group.research.aging.utils.SimpleSourceFormatter
 import io.getquill.{Literal, SqliteJdbcContext}
 import shapeless._
@@ -24,7 +24,7 @@ object Controller extends LogSupport{
   lazy val db = new GEOmeta(ctx)
 
   def getSamples(limit: Long = 0, offset: Long = 0) = {
-    val gsms = db.sequencing_gsm(30)
+    val gsms = db.sequencing(30)
     gsms
   }
 
@@ -32,7 +32,7 @@ object Controller extends LogSupport{
     val gsms = getSamples(limit)
     val species = getAllSpecies()
     val platforms = db.all_sequencers()
-    val query = QueryInfo(species, platforms.toList)
+    val query = SamplesQueryInfo(species, platforms.toList)
     actions.LoadedSequencing(query, gsms, limit, offset)
     //actions
   }

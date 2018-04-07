@@ -181,7 +181,7 @@ object Tables {
 
 }
 
-case class Sequencing_GSM(
+case class Sequencing(
                                       ID: String,
                                       title: String,
                                       gsm: String,
@@ -207,26 +207,26 @@ case class Sequencing_GSM(
                                       data_row_count: Double,
                                       channel_count: Double,
                                       sequencer: String
-                                    ) extends StringId[Sequencing_GSM]{
+                                    ) extends StringId[Sequencing]{
 
-  lazy val asRecord = Sequencing_GSM.labeledGen.to(this)
+  lazy val asRecord = Sequencing.labeledGen.to(this)
   def asMap = asRecord.toMap
   def keys = asRecord.keys
   def fieldNames = keys.toList.map(_.toString.replace("'", ""))
 
-  lazy val asGen = Sequencing_GSM.gen.to(this)
+  lazy val asGen = Sequencing.gen.to(this)
   def asList = asGen.toList
   def asStringList = asList.map(_.toString)
 }
 
 
-object Sequencing_GSM {
+object Sequencing {
 
-  val labeledGen =  LabelledGeneric[Sequencing_GSM]
+  val labeledGen =  LabelledGeneric[Sequencing]
 
-  val gen = Generic[Sequencing_GSM]
+  val gen = Generic[Sequencing]
 
-  def fromGSM(gsm: Tables.gsm, technology: String): Sequencing_GSM = {
+  def fromGSM(gsm: Tables.gsm, technology: String): Sequencing = {
     val record  = Tables.gsm.labeledGen.to(gsm)
     val recSmall = (record - 'source_name_ch2 -'organism_ch2 -
       'characteristics_ch2 - 'molecule_ch2 - 'label_ch2 -
@@ -238,6 +238,6 @@ object Sequencing_GSM {
   }
 
 
-  def asMap(seq_gsm: Sequencing_GSM) = labeledGen.to(seq_gsm).toMap
+  def asMap(seq_gsm: Sequencing) = labeledGen.to(seq_gsm).toMap
 
 }

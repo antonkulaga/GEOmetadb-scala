@@ -1,6 +1,6 @@
 package group.research.aging.geometa.web.actions
 
-import group.research.aging.geometa.models.Sequencing_GSM
+import group.research.aging.geometa.models.Sequencing
 import io.circe.generic.JsonCodec
 
 // Data type for events coming from the outside world:
