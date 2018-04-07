@@ -103,6 +103,8 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
       path("species") {
         complete { Controller.getAllSpecies().asJson }
       } ~ path("platforms"){
+        complete { Controller.getAllPlatforms().asJson }
+      } ~ path("platforms"){
         complete { Controller.getAllSpecies().asJson }
       }
     }

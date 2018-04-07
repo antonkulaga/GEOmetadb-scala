@@ -9,7 +9,8 @@ import scala.collection.immutable._
 import group.research.aging.geometa.models._
 //import wvlet.log.{LogLevel, LogSupport, Logger}
 
-class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type]) {
+class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
+{
   import context._
 
   lazy val technology: String = "high-throughput sequencing"
@@ -84,12 +85,23 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type]) {
   }
 
   def all_species() = {
-    val q = context.quote{
-      query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct
-    }
+    val q = context.quote{ query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct}
     context.run(q).toList
   }
-  
+
+  def all_molecules() = {
+    val q = context.quote{
+      for {
+        sample <- query[Tables.gsm]
+        gpl <- query[Tables.gpl]
+        if sample.gpl == gpl.gpl
+        if gpl.technology == lift(technology)
+      } yield { sample.molecule_ch1 }
+    }
+    context.run(q.distinct).toList
+  }
+
+
   def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {
     val q = context.quote{
       query[Tables.gpl].filter(g=>g.technology == lift(technology))

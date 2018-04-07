@@ -49,4 +49,7 @@ object Controller extends LogSupport{
     db.all_sequencers().toList
   }
 
+  def getAll44() = {
+    db.all_species()
+  }
 }

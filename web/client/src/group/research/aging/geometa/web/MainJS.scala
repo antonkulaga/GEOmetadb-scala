@@ -26,7 +26,10 @@ object MainJS extends Base{
   val throwError: Var[actions.ExplainedError] = Var(actions.ExplainedError.empty)
   val updateUI: Var[actions.UpdateUI] = Var(actions.NotUpdateUI)
 
-  val allActions: Rx[actions.Action] = toLoad merge loaded merge throwError
+  val allActions: Rx[actions.Action] = toLoad merge loaded merge updateUI merge throwError
+
+  val state: Rx[states.State] = allActions.dropRepeats.foldp(states.State.empty){ case (s, a) => reducer(s, a)}
+
 
   @JSExport
   def page(page: String, parameters: String*) = {
@@ -36,7 +39,6 @@ object MainJS extends Base{
     toLoad := actions.LoadPage(page)
   }
 
-  val state: Rx[states.State] = allActions.dropRepeats.foldp(states.State.empty){ case (s, a) => reducer(s, a)}
 
   //val species: Rx
 
