@@ -1,15 +1,10 @@
 package group.research.aging.geometa.web.states
 
+import cats.kernel.Monoid
 import group.research.aging.geometa.web.actions.{ExplainedError, LoadedSequencing}
 import io.circe.generic.JsonCodec
 
 import scala.collection.immutable._
-
-object State {
-
-  lazy val empty = State("none", LoadedSequencing.empty, Table.empty)
-
-}
 
 object SamplesQueryInfo{
   lazy val empty = SamplesQueryInfo(Nil, Nil)
@@ -21,7 +16,16 @@ object Table{
 }
 @JsonCodec case class Table(headers: List[String], data: List[List[String]]
                            )
+object State{
 
+  lazy val empty = State("none", LoadedSequencing.empty, Table.empty)
+
+  implicit def monoid: cats.Monoid[State] = new Monoid[State] {
+    override def empty: State = State.empty
+
+    override def combine(x: State, y: State): State = y //ugly TODO: rewrite
+  }
+}
 @JsonCodec case class State (page: String,
                              sequencing: LoadedSequencing,
                              table: Table = Table.empty,

@@ -24,7 +24,8 @@ object Controller extends LogSupport{
   lazy val db = new GEOmeta(ctx)
 
   def getSamples(limit: Long = 0, offset: Long = 0) = {
-    val gsms = db.sequencing(30)
+    //val gsms = db.sequencing(30)
+    val gsms = db.neededSequencing(30)
     gsms
   }
 

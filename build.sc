@@ -74,7 +74,10 @@ object geo extends Module {
       ivy"com.kailuowang::henkan-convert:0.6.1",
       ivy"com.kailuowang::henkan-optional:0.6.1",
       ivy"com.micronautics::quill-cache:3.5.9",
-      ivy"io.getquill::quill-jdbc:2.3.3"
+      ivy"io.getquill::quill-jdbc:2.3.3",
+			ivy"org.tpolecat::doobie-core:0.5.2",
+			ivy"org.tpolecat::doobie-postgres:0.5.2",
+			ivy"org.tpolecat::doobie-hikari:0.5.2"
     )
 
 
@@ -136,8 +139,6 @@ object web extends Module{
 	  def scalaVersion = scala_version
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
-			ivy"io.getquill::quill:2.3.3",
-			ivy"com.micronautics::quill-cache:3.5.9",
 			ivy"com.typesafe.akka::akka-stream:2.5.11",
 			ivy"com.typesafe.akka::akka-http:10.1.0",
 			ivy"com.typesafe.akka::akka-http-xml:10.1.0",

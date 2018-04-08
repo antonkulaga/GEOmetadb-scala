@@ -11,10 +11,10 @@ import scala.xml.Elem
 class SamplesView(loadedSequencing: Rx[LoadedSequencing], toLoad: Var[ToLoad], toUpdate: Var[UpdateUI]) extends Base {
 
 
-  val queryView = new SamplesQueryView(loadedSequencing.map(_.queryInfo), toLoad, toUpdate)
+  val queryView = new SamplesQueryView(loadedSequencing.map(_.queryInfo).dropRepeats, toLoad, toUpdate)
 
 
-  val sequencing = loadedSequencing.map(_.sequencing)
+  val sequencing = loadedSequencing.map(_.sequencing).dropRepeats
   /**
     * ID: String,
     * title: String,

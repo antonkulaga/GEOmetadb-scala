@@ -20,15 +20,32 @@ object MainJS extends Base{
 
   debug("MainJS STARTED!!!!!!")
 
-
   val toLoad: Var[actions.ToLoad] = Var(actions.NothingToLoad)
   val loaded: Var[actions.Loaded] = Var(actions.NothingLoaded)
   val throwError: Var[actions.ExplainedError] = Var(actions.ExplainedError.empty)
   val updateUI: Var[actions.UpdateUI] = Var(actions.NotUpdateUI)
 
-  val allActions: Rx[actions.Action] = toLoad merge loaded merge updateUI merge throwError
+  //val allActions: Rx[actions.Action] = toLoad.merge(loaded).merge(updateUI).merge(throwError).dropRepeats //because Merge is super-buggy in monadic-html and produces a lot of redundant events
+  //ugly workaround for https://github.com/OlivierBlanvillain/monadic-html/issues/98
+  val allActions: Var[actions.Action] = Var(actions.NothingLoaded)
+  protected def uglyUpdate(rxes: Rx[actions.Action]*) = {
+    for(r <- rxes) r.impure.run(v=> allActions := v)
+  }
 
-  val state: Rx[states.State] = allActions.dropRepeats.foldp(states.State.empty){ case (s, a) => reducer(s, a)}
+  uglyUpdate(toLoad, throwError, updateUI, loaded)
+
+
+  val state: Var[states.State] = Var(states.State.empty)
+
+  //workaround to avoid foldp issues
+  allActions.impure.run{ a=>
+    val currentState: states.State = state.now
+    val newState = reducer(currentState, a)
+    if(newState != currentState) state := newState
+  }
+
+
+  //val state: Rx[states.State] = allActions.foldp(states.State.empty){ case (s, a) => reducer(s, a)}.dropRepeats
 
 
   @JSExport
@@ -42,7 +59,7 @@ object MainJS extends Base{
 
   //val species: Rx
 
-  val samplesView = new SamplesView(state.map(s=>s.sequencing), toLoad, updateUI)
+  val samplesView = new SamplesView(state.map(s=>s.sequencing).dropRepeats, toLoad, updateUI)
   val errorView = new ErrorsView(state.map(s=>s.errors))
   //{  tableView.component }
 
@@ -64,9 +81,10 @@ object MainJS extends Base{
 
   lazy val loadReducer: Reducer = {
 
-    case (previous, actions.NothingToLoad) => previous
-    case (previous, actions.ExplainedError.empty) => previous
-    case (previous, actions.NothingLoaded) => previous
+    case (previous, actions.NothingToLoad |
+                    actions.ExplainedError.empty |
+                    actions.NothingLoaded |
+                    actions.NotUpdateUI) => previous
 
     case (previous, actions.LoadPage(page)) =>
       val u = Uri(path = s"/view/${page}")

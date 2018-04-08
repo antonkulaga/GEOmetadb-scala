@@ -54,13 +54,13 @@ class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLo
 
   lazy val queries =
       <tr>
+        <th></th>
+        <th></th>
+        <th></th>
         <th>{ speciesHTML }</th>
+        <th></th>
+        <th></th>
         <th>{ platformsHTML }</th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
         <th></th>
         <th></th>
         <th></th>
@@ -77,10 +77,10 @@ class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLo
     <thead>
       { labels }
       { queries }
-      {
-        updateUI := actions.EvalJS(jsUpdate)
+      {queryInfo.map{ q=>
+        if(q!=SamplesQueryInfo.empty) updateUI := actions.EvalJS(jsUpdate)
         "" //trying to trigger update
-      }
+      }}
     </thead>
 
 //<button class={ enabledIf("ui primary button", speciesToChoose) } onclick = { updateClick(toLoad, Search.empty) }>Search</button>

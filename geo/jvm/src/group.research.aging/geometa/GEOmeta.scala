@@ -50,6 +50,23 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
     results.map{ case (sample, title) => Sequencing.fromGSM(sample, get_sequencer(title))}.sortBy(g=>g.molecule_ch1)
   }
 
+  def neededSequencing(limit: Int = 0, offset: Int = 0)= {
+    val q = context.quote{
+      for {
+        sample <- query[Tables.gsm]
+        gpl <- query[Tables.gpl]
+        if sample.gpl == gpl.gpl
+        if gpl.technology == lift(technology)
+        if sample.characteristics_ch1 like "%age"
+        if sample.characteristics_ch1 like "%tissue%"
+        if sample.organism_ch1 like "Mus musculus"
+        if sample.molecule_ch1 like "total RNA"
+      } yield { (sample, gpl.title) }
+    }
+    val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
+    results.map{ case (sample, title) => Sequencing.fromGSM(sample, get_sequencer(title))}
+  }
+
   def sequencing(limit: Int = 0, offset: Int = 0)= {
     val q = context.quote{
       for {
@@ -62,6 +79,7 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
     val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)
     results.map{ case (sample, title) => Sequencing.fromGSM(sample, get_sequencer(title))}
   }
+
 
 
   def gsm(limit: Int = 0, offset: Int = 0): List[Tables.gsm] = {
@@ -86,6 +104,17 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
 
   def all_species() = {
     val q = context.quote{ query[Tables.gpl].filter(g=>g.technology == lift(technology)).map(_.organism).distinct}
+    //context.run(q).toList
+    /*
+    val q = context.quote{
+      for {
+        sample <- query[Tables.gsm]
+        gpl <- query[Tables.gpl]
+        if sample.gpl == gpl.gpl
+        if gpl.technology == lift(technology)
+      } yield { sample.organism_ch1 }
+    }
+    */
     context.run(q).toList
   }
 
@@ -100,6 +129,23 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
     }
     context.run(q.distinct).toList
   }
+
+  /*
+  def complexSearch() = {
+    val q = context.quote {
+      infix"""SELECT sample.ID, sample.title, sample.gsm, sample.series_id, sample.gpl, sample.status,
+              sample.submission_date, sample.last_update_date, sample.type, sample.source_name_ch1,
+              sample.organism_ch1, sample.characteristics_ch1, sample.molecule_ch1, sample.label_ch1,
+              sample.treatment_protocol_ch1, sample.extract_protocol_ch1, sample.label_protocol_ch1,
+              sample.source_name_ch2, sample.organism_ch2, sample.characteristics_ch2, sample.molecule_ch2,
+              sample.label_ch2, sample.treatment_protocol_ch2, sample.extract_protocol_ch2, sample.label_protocol_ch2,
+              sample.hyb_protocol, sample.description, sample.data_processing, sample.contact, sample.supplementary_file,
+              sample.data_row_count, sample.channel_count, gpl.title
+           FROM gsm sample, gpl gpl
+           WHERE sample.gpl = gpl.gpl AND gpl.technology = ${technology}"""
+    }
+  }
+  */
 
 
   def gpl(limit: Int = 0, offset: Int = 0): List[Tables.gpl] = {
