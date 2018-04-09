@@ -59,8 +59,9 @@ class GEOmeta(val context: JdbcContext[SqliteDialect, Literal.type])
         if gpl.technology == lift(technology)
         if sample.characteristics_ch1 like "%age"
         if sample.characteristics_ch1 like "%tissue%"
-        if sample.organism_ch1 like "Mus musculus"
-        if sample.molecule_ch1 like "total RNA"
+        if  (sample.characteristics_ch1 like "%kidney%") || (sample.characteristics_ch1 like "%liver%")
+        if sample.organism_ch1 like "%Mus musculus%"
+        if sample.molecule_ch1 like "%total RNA%"
       } yield { (sample, gpl.title) }
     }
     val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q)

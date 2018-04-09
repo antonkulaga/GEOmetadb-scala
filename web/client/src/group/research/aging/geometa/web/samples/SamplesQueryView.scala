@@ -34,14 +34,14 @@ class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLo
         <th>Title</th>
         <th>GSM</th>
         <th>GSE</th>
-        <th>Species</th>
-        <th>Characteristics</th>
+        <th class="two wide">Species</th>
+        <th class="three wide">Characteristics</th>
         <th>Source</th>
         <th>Sequencer</th>
         <th>Extracted Molecule</th>
-        <th>Extraction Protocol</th>
+        <th class="three wide">Extraction Protocol</th>
         <th>Description</th>
-        <th>Proccesing</th>
+        <th class="two wide">Proccesing</th>
         <th>Treatment Protocol</th>
         <th>Submission</th>
         <th>Last Update</th>

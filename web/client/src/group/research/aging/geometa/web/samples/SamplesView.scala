@@ -8,7 +8,10 @@ import mhtml.{Rx, Var}
 
 import scala.xml.Elem
 
-class SamplesView(loadedSequencing: Rx[LoadedSequencing], toLoad: Var[ToLoad], toUpdate: Var[UpdateUI]) extends Base {
+class SamplesView(loadedSequencing: Rx[LoadedSequencing],
+                  toLoad: Var[ToLoad],
+                  toUpdate: Var[UpdateUI])
+  extends Base {
 
 
   val queryView = new SamplesQueryView(loadedSequencing.map(_.queryInfo).dropRepeats, toLoad, toUpdate)

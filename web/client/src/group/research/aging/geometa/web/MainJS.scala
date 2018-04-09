@@ -31,10 +31,7 @@ object MainJS extends Base{
   protected def uglyUpdate(rxes: Rx[actions.Action]*) = {
     for(r <- rxes) r.impure.run(v=> allActions := v)
   }
-
   uglyUpdate(toLoad, throwError, updateUI, loaded)
-
-
   val state: Var[states.State] = Var(states.State.empty)
 
   //workaround to avoid foldp issues

@@ -31,7 +31,6 @@ object NotNull extends Poly1 {
   implicit val longCase: Case.Aux[Long, Long] =
     at[Long](v => v)
 
-
   implicit val doubleCase: Case.Aux[Double, Double] =
     at[Double](v => if(v == Double.NaN) 0.0 else v)
 
