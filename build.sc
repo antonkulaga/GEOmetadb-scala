@@ -69,13 +69,12 @@ object geo extends Module {
 
     override def ivyDeps = geo_ivy_deps ++ Agg(
       ivy"io.getquill::quill:2.3.3",
-      ivy"org.xerial:sqlite-jdbc:3.18.0",
+			ivy"io.getquill::quill-jdbc:2.3.3",
+			ivy"org.xerial:sqlite-jdbc:3.18.0",
       ivy"org.postgresql:postgresql:9.4.1208",
       ivy"com.kailuowang::henkan-convert:0.6.1",
       ivy"com.kailuowang::henkan-optional:0.6.1",
-      ivy"com.micronautics::quill-cache:3.5.9",
-      ivy"io.getquill::quill-jdbc:2.3.3",
-			ivy"org.tpolecat::doobie-core:0.5.2",
+      ivy"org.tpolecat::doobie-core:0.5.2",
 			ivy"org.tpolecat::doobie-postgres:0.5.2",
 			ivy"org.tpolecat::doobie-hikari:0.5.2"
     )

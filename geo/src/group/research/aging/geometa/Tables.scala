@@ -1,6 +1,5 @@
 package group.research.aging.geometa
 
-import model.persistence.HasId
 import shapeless._
 
 object Tables {
@@ -34,7 +33,7 @@ object Tables {
       GSM Acc	 	 	GSMs separated by comma
       GSM Count	 	 	number of GSMs
       */
-    ) //extends DoubleId[gse]
+    )
 
     case class gpl(
                     ID: Double,
@@ -57,7 +56,7 @@ object Tables {
                     data_row_count: Double,
                     supplementary_file: String,
                     bioc_package: String
-                  ) //extends DoubleId[gpl]
+                  )
 
 
   trait Ch2 {
@@ -109,7 +108,7 @@ object Tables {
                   supplementary_file: String,
                   data_row_count: Double,
                   channel_count: Double,
-                ) extends Ch2 with StringId[gsm]
+                ) extends Ch2
 
 
   case class gds(
@@ -131,21 +130,9 @@ object Tables {
                   gse: String,
                   order: String,
                   update_date: String
-                ) extends StringId[gds]
+                )
 
   case class gse_gsm(gse: String, gsm: String)
   case class gse_gpl(gse: String, gpl: String)
 
 }
-
-trait StringId[T] extends HasId[T, String] {
-  def ID: String
-  lazy val id: model.persistence.Id[String] = model.persistence.Id(ID)
-}
-
-/*
-trait DoubleId[T] extends HasId[T, Double] {
-  def ID: Double
-  lazy val id: model.persistence.Id[Double] = model.persistence.Id(ID)
-}
-*/

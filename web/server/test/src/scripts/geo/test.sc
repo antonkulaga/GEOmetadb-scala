@@ -35,8 +35,8 @@ val q = context.quote{
 }
 //val results = if(limit > 0) context.run(q.drop(lift(offset)).take(lift(limit))) else context.run(q.drop(lift(offset)))
 
-val r2 = context.run(q)
-println(r2.length)
+//val r2 = context.run(q)
+//println(r2.length)
 
 //geo.Sequencing(50).size
 //for(e <- geo.Sequencing(50)) println(Sequencing.asMap(e))

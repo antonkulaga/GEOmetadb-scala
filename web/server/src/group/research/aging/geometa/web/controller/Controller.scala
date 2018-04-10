@@ -1,56 +1,28 @@
 package group.research.aging.geometa.web.controller
 
-import com.typesafe.config.ConfigFactory
+import cats.effect.IO
+import doobie.hikari.HikariTransactor
 import group.research.aging.geometa.GEOmeta
-import group.research.aging.geometa.models.Sequencing
 import group.research.aging.geometa.web.actions
 import group.research.aging.geometa.web.states.SamplesQueryInfo
-import group.research.aging.utils.SimpleSourceFormatter
-import io.getquill.{Literal, SqliteJdbcContext}
-import shapeless._
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
-import wvlet.log.{LogLevel, LogSupport, Logger}
+import wvlet.log.{LogLevel, Logger}
 
-object Controller extends LogSupport{
+
+class Controller(transactor: IO[HikariTransactor[IO]]) extends GEOmeta(transactor){
 
   // Set the default log formatter
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
 
-  lazy val config = ConfigFactory.load().getConfig("quill-cache").getConfig("sqlite")
 
-  lazy val ctx: SqliteJdbcContext[Literal.type] = new SqliteJdbcContext(Literal, config)
-
-  lazy val db = new GEOmeta(ctx)
-
-  def getSamples(limit: Long = 0, offset: Long = 0) = {
-    //val gsms = db.sequencing(30)
-    val gsms = db.neededSequencing(30)
-    gsms
-  }
-
-  def loadSequencing(limit: Long = 0, offset: Long = 0) = {
-    val gsms = getSamples(limit)
-    val species = getAllSpecies()
-    val platforms = db.all_sequencers()
-    val query = SamplesQueryInfo(species, platforms.toList)
+  def loadSequencing(species: String = "", limit: Int = 0, offset: Int = 0) = {
+    val gsms = super.sequencing(species, limit = limit, offset = offset)
+    val sp = super.all_species()
+    val platforms = super.all_sequencers()
+    val query = SamplesQueryInfo(sp.toList, platforms.toList) //TODO: fix collections
     actions.LoadedSequencing(query, gsms, limit, offset)
     //actions
   }
 
-  def bySpecies(species: String) = {
-    db.sequencing_by_species(species)
-  }
-
-  def getAllSpecies() = {
-    db.all_species().flatMap(s=>s.split("\t").map(_.trim)).distinct
-  }
-
-  def getAllPlatforms() = {
-    db.all_sequencers().toList
-  }
-
-  def getAll44() = {
-    db.all_species()
-  }
 }

@@ -4,23 +4,37 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Authorization
-import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import akka.http.scaladsl.server.directives.CachingDirectives
-import com.typesafe.config.ConfigFactory
+import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import group.research.aging.geometa.GEOmeta
 import group.research.aging.geometa.web.controller.Controller
-import group.research.aging.utils.SimpleSourceFormatter
-import io.getquill.{Literal, SqliteJdbcContext}
-import scalacss.DevDefaults._
-import io.circe.syntax._
+import group.research.aging.util.PercentDecoder._
 import kantan.csv.{CsvConfiguration, rfc}
+import scalacss.DevDefaults._
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
 import wvlet.log.{LogLevel, LogSupport, Logger}
-import group.research.aging.util.PercentDecoder._
+//import wvlet.log.{LogLevel, LogSupport, Logger}
+import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+import cats.effect.IO
+import kantan.csv._
+import kantan.csv.ops._
+import kantan.csv.generic._
+
+import doobie.hikari._
 
 // Server definition
 object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with CachingDirectives {
+
+  //lazy val config = ConfigFactory.load().getString("sqlite")
+
+  def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
+   lazy val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
+
+  implicit val hikari: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+    "org.sqlite.JDBC", url, "", ""
+  )
+
+  val controller = new Controller(hikari)
 
   implicit val cacheSystem = ActorSystem("cacheSystem")
 
@@ -80,17 +94,15 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   lazy val defaultLimit = 50
 
   def view = cache(routeCache, simpleKeyer){pathPrefix("view" / "sequencing") { complete{
-      Controller.loadSequencing(defaultLimit).asJson
+      controller.sequencing(limit = defaultLimit).asJson
       }
     }
   }
 
   def download = cache(routeCache, simpleKeyer){pathPrefix("downloads"){
       pathPrefix("species" / Remaining ){ species =>
-        import kantan.csv._         // All kantan.csv types.
-        import kantan.csv.ops._     // Enriches types with useful methods.
-        import kantan.csv.generic._
-        val tsv = Controller.bySpecies(species.decode).asCsv(this.tsvConfig)
+
+        val tsv = controller.sequencing(species = species.decode).asCsv(this.tsvConfig)
         complete(
           HttpEntity(ContentTypes.`text/csv(UTF-8)`,tsv)
         )
@@ -101,11 +113,11 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   def suggest = cache(routeCache, simpleKeyer){
     pathPrefix("suggest"){
       path("species") {
-        complete { Controller.getAllSpecies().asJson }
+        complete { controller.all_species().asJson }
       } ~ path("platforms"){
-        complete { Controller.getAllPlatforms().asJson }
+        complete { controller.all_sequencers().asJson }
       } ~ path("platforms"){
-        complete { Controller.getAllSpecies().asJson }
+        complete { controller.all_sequencers().asJson }
       }
     }
   }
