@@ -2,29 +2,30 @@ package group.research.aging.geometa.web.samples
 
 import group.research.aging.geometa.web.Base
 import group.research.aging.geometa.web.actions
-import group.research.aging.geometa.web.states.SamplesQueryInfo
+import group.research.aging.geometa.web.states.SuggestionsInfo
 import mhtml._
 
 import scala.scalajs.js
 
-class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLoad], updateUI: Var[actions.UpdateUI]) extends Base {
+class SamplesQueryView(suggestions: Rx[SuggestionsInfo], toLoad: Var[actions.ToLoad], updateUI: Var[actions.UpdateUI]) extends Base {
 
-  val species: Rx[List[String]] = queryInfo.map(_.species)
-  val platforms: Rx[List[String]] = queryInfo.map(_.platforms)
+  val species: Rx[List[String]] = suggestions.map(_.species)
+  val sequencer: Rx[List[String]] = suggestions.map(_.sequencers)
+  val molecules = suggestions.map(_.molecules)
 
-  val updateFilters = species.merge(platforms)
+  val updateFilters = species.merge(sequencer)
 
   def option(value: String, label: String) = <option value={value}>{label}</option>
 
   val speciesToChoose = species.map(_.nonEmpty)
-  val platformsToChoose = platforms.map(_.nonEmpty)
+  val platformsToChoose = sequencer.map(_.nonEmpty)
 
   lazy val speciesHTML = <select class="ui fluid search dropdown" multiple="true">
     { species.map(ss =>ss.map(s=>option(s,s))) }
   </select>
 
   lazy val platformsHTML = <select class="ui fluid search dropdown" multiple="true">
-    { platforms.map(ss =>ss.map(s=>option(s,s))) }
+    { sequencer.map(ss =>ss.map(s=>option(s,s))) }
   </select>
 
 
@@ -61,7 +62,7 @@ class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLo
         <th></th>
         <th></th>
         <th>{ platformsHTML }</th>
-        <th></th>
+        <th>{ molecules }</th>
         <th></th>
         <th></th>
         <th></th>
@@ -77,8 +78,8 @@ class SamplesQueryView(queryInfo: Rx[SamplesQueryInfo], toLoad: Var[actions.ToLo
     <thead>
       { labels }
       { queries }
-      {queryInfo.map{ q=>
-        if(q!=SamplesQueryInfo.empty) updateUI := actions.EvalJS(jsUpdate)
+      {suggestions.map{ q=>
+        if(q!=SuggestionsInfo.empty) updateUI := actions.EvalJS(jsUpdate)
         "" //trying to trigger update
       }}
     </thead>

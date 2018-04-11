@@ -6,10 +6,27 @@ import io.circe.generic.JsonCodec
 
 import scala.collection.immutable._
 
-object SamplesQueryInfo{
-  lazy val empty = SamplesQueryInfo(Nil, Nil)
+object SuggestionsInfo{
+  lazy val empty = SuggestionsInfo(Nil, Nil)
 }
-@JsonCodec case class SamplesQueryInfo(species: List[String], platforms: List[String])
+@JsonCodec case class SuggestionsInfo(
+                                        species: List[String],
+                                        molecules: List[String] = Nil,
+                                        sequencers: List[String] = Nil,
+                                      )
+object QueryParameters {
+  lazy val empty = QueryParameters()
+
+}
+@JsonCodec case class QueryParameters(
+                            species: List[String] = Nil,
+                            molecules: List[String] = Nil,
+                            sequencers: List[String] = Nil,
+                            andLikeCharacteristics: List[String] = Nil,
+                            orLikeCharacteristics: List[String] = Nil,
+                            limit: Int = 0,
+                            offset: Int = 0
+                          )
 
 object Table{
   lazy val empty = Table(Nil, Nil)

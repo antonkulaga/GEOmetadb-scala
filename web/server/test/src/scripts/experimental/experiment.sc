@@ -28,7 +28,7 @@ import y._
 def run[T](q: doobie.ConnectionIO[T]): T =
   (for{ xa <- transactor ; selection <- q.transact(xa)} yield selection).unsafeRunSync
 
-def debug(q: Query0[Sequencing])=
+def debug[T](q: Query0[T])=
   {
     transactor.flatMap{ xa =>
       val y = xa.yolo
@@ -99,8 +99,12 @@ protected def likesOr(fieldName: Fragment, values: List[String], upper: Boolean 
   Some(Fragments.or(frags:_*))
 }
 
-protected def in_characteristics(values: List[String], upper: Boolean = true) = {
+protected def characteristics_and(values: List[String], upper: Boolean = true) = {
   likesAdd(fr"sample.characteristics_ch1", values, upper)
+}
+
+protected def characteristics_or(values: List[String], upper: Boolean = true) = {
+  likesOr(fr"sample.characteristics_ch1", values, upper)
 }
 
 protected def limitation(limit: Int = 0, offset: Int = 0) = if(limit <= 0) fr"" else if(offset <= 0) fr"LIMIT $limit" else fr"LIMIT $limit OFFSET ${offset}"
@@ -108,12 +112,14 @@ protected def limitation(limit: Int = 0, offset: Int = 0) = if(limit <= 0) fr"" 
 
 //val where = Fragments.whereAndOpt(Some(sequencingTech) , addOptSpecies(Some("Mus musculus")))
 
-val where = Fragments.whereAndOpt(
+val whereMitya = Fragments.whereAndOpt(
   Some(sequencingTech),
-  addSpecies(List("Mus musculus")),
+  addSpecies(List("Mus musculus", "Bos taurus")),
+  //addSpecies(List("Mus musculus", "Homo sapiens", "Bos taurus")),
   addMolecule(List("total RNA")),
   likeAndSequencer(List("llumina HiSeq 2500")),
-  in_characteristics(List("age", "tissue", "liver"))
+  characteristics_and(List("age", "tissue")),
+  characteristics_or(List("liver", "kidney"))
 )
 
 
@@ -126,21 +132,38 @@ val limitation =  if(limit <= 0) fr"" else
     else fr"LIMIT $limit OFFSET ${offset}"
 */
 
-val q: Query0[Sequencing] =
-  (sql"""SELECT sample.ID, sample.title, sample.gsm, sample.series_id, sample.gpl, sample.status,
+val sampleSelection =
+  sql"""SELECT sample.ID, sample.title, sample.gsm, sample.series_id, sample.gpl, sample.status,
           sample.submission_date, sample.last_update_date, sample.type, sample.source_name_ch1,
           sample.organism_ch1, sample.characteristics_ch1, sample.molecule_ch1,
           sample.treatment_protocol_ch1, sample.extract_protocol_ch1,
           sample.description, sample.data_processing, sample.contact,
           sample.data_row_count, sample.channel_count, gpl.title
-        FROM gsm sample, gpl """ ++ where ++ limitation(10)).query[Sequencing]//.to[List]
-//debug(q)
-println("---")
+        FROM gsm sample, gpl """
 
-val results = run(q.to[List])
-println(results.length)
+val sampleCount =
+  sql"""SELECT count(*)
+        FROM gsm sample, gpl """
+
+
+val q1: Query0[Sequencing] = (sampleSelection ++ whereMitya ++ limitation(50)).query[Sequencing]//.to[List]
+
+//val q2: Query0[Int] = (sampleCount ++ whereMitya).query[Int]//.to[List]
+
+
+val results1 = run(q1.to[List])
+println(results1.length)
+println("------")
+BlackWhite.pprintln(results1, height = 300)
 println("====")
-BlackWhite.pprintln(results)
+
+/*
+val results2 = run(q2.option).get
+println(results2)
+println("------")
+BlackWhite.pprintln(results2)
+*/
+
 //val r = q.check.runAsync
 //debug(q)
 //pprint.pprintln(r)

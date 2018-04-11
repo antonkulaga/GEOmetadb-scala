@@ -3,7 +3,7 @@ package group.research.aging.geometa.web.samples
 import group.research.aging.geometa.models.Sequencing
 import group.research.aging.geometa.web.Base
 import group.research.aging.geometa.web.actions.{LoadedSequencing, ToLoad, UpdateUI}
-import group.research.aging.geometa.web.states.SamplesQueryInfo
+import group.research.aging.geometa.web.states.SuggestionsInfo
 import mhtml.{Rx, Var}
 
 import scala.xml.Elem

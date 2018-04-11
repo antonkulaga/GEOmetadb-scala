@@ -1,7 +1,7 @@
 package group.research.aging.geometa.web.actions
 
 import group.research.aging.geometa.models.Sequencing
-import group.research.aging.geometa.web.states.SamplesQueryInfo
+import group.research.aging.geometa.web.states.SuggestionsInfo
 import io.circe.generic.JsonCodec
 
 trait Loaded extends Action
@@ -15,10 +15,10 @@ case object NothingLoaded extends Loaded
 )
 
 object LoadedSequencing {
-  lazy val empty = LoadedSequencing(SamplesQueryInfo.empty, Nil, 0 , 0)
+  lazy val empty = LoadedSequencing(SuggestionsInfo.empty, Nil, 0 , 0)
 }
 @JsonCodec case class LoadedSequencing(
-                                        queryInfo: SamplesQueryInfo,
+                                        queryInfo: SuggestionsInfo,
                                         sequencing: List[Sequencing],
                                         limit: Long,
                                         offset: Long

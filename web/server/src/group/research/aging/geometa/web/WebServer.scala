@@ -99,10 +99,11 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     }
   }
 
+
   def download = cache(routeCache, simpleKeyer){pathPrefix("downloads"){
       pathPrefix("species" / Remaining ){ species =>
 
-        val tsv = controller.sequencing(species = species.decode).asCsv(this.tsvConfig)
+        val tsv = controller.sequencing(species = List(species.decode)).asCsv(this.tsvConfig)
         complete(
           HttpEntity(ContentTypes.`text/csv(UTF-8)`,tsv)
         )
