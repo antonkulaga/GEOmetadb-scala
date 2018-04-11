@@ -15,13 +15,41 @@ import doobie.hikari.implicits._
 
 class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends
 {
+
   lazy val technology: String = "high-throughput sequencing"
-  lazy val sequencingTech = Fragments.whereAnd(fr"sample.gpl = gpl.gpl", fr"gpl.technology = '${technology}'")
+  lazy val sequencingTech = Fragments.and(fr"sample.gpl = gpl.gpl", fr"gpl.technology = ${technology}")
 
   protected def addOpt(fieldName: Fragment, value: Option[String]) = value.map(sp=> fr" UPPER(" ++ fieldName ++ fr") = ${sp.toUpperCase}")
-  protected def addOptSpecies(value: Option[String]) = addOpt(fr"sample.organism_ch1", value)
-  protected def limitation(limit: Int = 0, offset: Int = 0) = if(limit <= 0) fr"" else if(offset <= 0) fr"LIMIT $limit" else fr"LIMIT $limit OFFSET ${offset}"
 
+  protected def addInOpt(fieldName: Fragment, values: List[String]): Option[doobie.Fragment] = if(values.size > 1)
+  {
+    val frag: Fragment = fr" UPPER(" ++ fieldName ++ fr")"
+    values.toNel.map(v => Fragments.in(frag, v.map(_.toUpperCase)))
+  } else addOpt(fieldName, values.headOption)
+
+  protected def addSpecies(values: List[String]) = addInOpt(fr"sample.organism_ch1", values)
+  protected def addMolecule(values: List[String]) = addInOpt(fr"sample.molecule_ch1", values)
+  protected def addSequencer(values: List[String]) = addInOpt(fr"gpl.title", values)
+  protected def likeAndSequencer(values: List[String]): Option[doobie.Fragment] = likesAdd(fr"gpl.title", values)
+  protected def likeOrSequencer(values: List[String]): Option[doobie.Fragment] = likesOr(fr"gpl.title", values)
+  
+  protected def likesAdd(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
+    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
+    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
+    Some(Fragments.and(frags:_*))
+  }
+
+  protected def likesOr(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
+    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
+    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
+    Some(Fragments.or(frags:_*))
+  }
+
+  protected def in_characteristics(values: List[String], upper: Boolean = true) = {
+    likesAdd(fr"sample.characteristics_ch1", values, upper)
+  }
+
+  protected def limitation(limit: Int = 0, offset: Int = 0) = if(limit <= 0) fr"" else if(offset <= 0) fr"LIMIT $limit" else fr"LIMIT $limit OFFSET ${offset}"
 
   def run[T](q: doobie.ConnectionIO[T]): T =
     (for{ xa <- transactor ; selection <- q.transact(xa)} yield selection).unsafeRunSync
@@ -71,7 +99,9 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends
     run(q).map(s=>s.withFixedSequencer)
   }
 
-  def sequencing(species: String = None, limit: Int = 0, offset: Int = 0)= {
+  def sequencing(species: List[String] = Nil,
+                 molecules: List[String] = Nil,
+                 limit: Int = 0, offset: Int = 0)= {
 
     val sp = if(species == "") "" else s" AND sample.organism_ch1 = '${species}'"
     val range =  if(limit <= 0) "" else s"LIMIT $limit"+ (if(offset <= 0) "" else s" OFFSET ${offset}")
