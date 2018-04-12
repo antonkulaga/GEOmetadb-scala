@@ -120,7 +120,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
         complete { controller.all_species().asJson }
       } ~ path("platforms"){
         complete { controller.all_sequencers().asJson }
-      } ~ path("platforms"){
+      } ~ path("molecules"){
         complete { controller.all_molecules().asJson }
       }
     }

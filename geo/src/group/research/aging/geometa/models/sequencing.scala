@@ -35,32 +35,28 @@ object Sequencing {
 }
 
 @JsonCodec case class Sequencing(
-                                      ID: String,
-                                      title: String,
-                                      gsm: String,
-                                      series_id: String,
-                                      gpl: String,
-                                      status: String,
-                                      submission_date: String,
-                                      last_update_date: String,
-                                      `type`: String,
-                                      source_name_ch1: String,
-                                      organism_ch1: String,
-                                      characteristics_ch1: String,
-                                      molecule_ch1: String,
-                                      //label_ch1: String,
-                                      treatment_protocol_ch1: Option[String],
-                                      extract_protocol_ch1: String,
-                                      //label_protocol_ch1: String,
-                                      //hyb_protocol: String,
-                                      description:  Option[String],
-                                      data_processing: String,
-                                      contact: String,
-                                      //supplementary_file: String,
-                                      data_row_count: Double,
-                                      channel_count: Double,
-                                      sequencer: String
-                                    ) {
+                                  ID: String,
+                                  title: String,
+                                  gsm: String,
+                                  series_id: String,
+                                  gpl: String,
+                                  status: String,
+                                  submission_date: String,
+                                  last_update_date: String,
+                                  `type`: String,
+                                  source_name_ch1: String,
+                                  organism_ch1: String,
+                                  characteristics_ch1: String,
+                                  molecule_ch1: String,
+                                  treatment_protocol_ch1: Option[String],
+                                  extract_protocol_ch1: Option[String],
+                                  description:  Option[String],
+                                  data_processing: Option[String],
+                                  contact: String,
+                                  data_row_count: Double,
+                                  channel_count: Double,
+                                  sequencer: String
+                                ){
 
   lazy val asRecord = Sequencing.labeledGen.to(this)
   def asMap = asRecord.toMap

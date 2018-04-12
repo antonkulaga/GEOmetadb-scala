@@ -42,7 +42,7 @@ class SamplesQueryView(suggestions: Rx[actions.SuggestionsInfo], toLoad: Var[act
         <th>Sequencer</th>
         <th>Extracted Molecule</th>
         <th class="three wide">Extraction Protocol</th>
-        <th>Description</th>
+        <th class="two wide">Description</th>
         <th class="two wide">Proccesing</th>
         <th>Treatment Protocol</th>
         <th>Submission</th>

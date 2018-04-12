@@ -18,13 +18,14 @@ class Controller(transactor: IO[HikariTransactor[IO]]) extends GEOmeta(transacto
   def loadSequencing(
                       parameters: actions.QueryParameters
                     ) = {
-    val gsms = super.sequencing(species = parameters.species,
-    molecules = parameters.molecules,
-    sequencers = parameters.sequencers,
-    andLikeCharacteristics = parameters.andLikeCharacteristics,
-    orLikeCharacteristics = parameters.orLikeCharacteristics,
-    limit = parameters.limit,
-    offset = parameters.offset)
+    val gsms = super.sequencing(
+      species = parameters.species,
+      molecules = parameters.molecules,
+      sequencers = parameters.sequencers,
+      andLikeCharacteristics = parameters.andLikeCharacteristics,
+      orLikeCharacteristics = parameters.orLikeCharacteristics,
+      limit = parameters.limit,
+      offset = parameters.offset)
     val suggestions = actions.SuggestionsInfo.empty//actions.SuggestionsInfo(super.all_species().toList, super.all_sequencers().toList, super.all_molecules().toList) //TODO: fix collections
     actions.LoadedSequencing(suggestions, parameters, gsms)
     //actions

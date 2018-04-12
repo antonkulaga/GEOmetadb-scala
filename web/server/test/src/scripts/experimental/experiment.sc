@@ -35,14 +35,15 @@ val controller = new Controller(transactor)
 
 
 //val q = sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = 'gsm' AND type = 'table'""".query[(String, String)]
-//controller.debug(controller.loadSequencingQuery(QueryParameters.test))
-//BlackWhite.pprintln(controller.run(controller.loadSequencingQuery(QueryParameters.test).to[List]))
+//controller.run(controller.loadSequencingQuery(QueryParameters.test).to[List])
+
+BlackWhite.pprintln(controller.run(controller.loadSequencingQuery(QueryParameters.test).to[List]))
 //BlackWhite.pprintln(controller.all_molecules())
 //println("====================================")
 //BlackWhite.pprintln(controller.all_species())
 //println("====================================")
-BlackWhite.pprintln(controller.all_sequencers())
-println("====================================")
+//BlackWhite.pprintln(controller.all_sequencers())
+//println("====================================")
 /*
 //controller.debug(q)
 //BlackWhite.pprintln(controller.run(q.to[List]))

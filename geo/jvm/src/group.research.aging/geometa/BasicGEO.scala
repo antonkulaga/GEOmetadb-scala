@@ -50,17 +50,18 @@ trait BasicGEO{
   protected def likeAndSequencer(values: List[String]): Option[doobie.Fragment] = likesAdd(fr"gpl.title", values)
   protected def likeOrSequencer(values: List[String]): Option[doobie.Fragment] = likesOr(fr"gpl.title", values)
 
+  protected def likeInside(fieldName: Fragment, values: List[String], upper: Boolean) = {
+    val f = if(upper) fr"UPPER("++fieldName ++ fr")" else fieldName
+    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
+    cased.map(v=> f ++ fr"LIKE ${v}")
+  }
 
   protected def likesAdd(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
-    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
-    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
-    Some(Fragments.and(frags:_*))
+    Some(fr"(" ++Fragments.and(likeInside(fieldName, values, upper):_*) ++ fr")")
   }
 
   protected def likesOr(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
-    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
-    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
-    Some(Fragments.or(frags:_*))
+    Some(fr"(" ++ Fragments.or(likeInside(fieldName, values, upper):_*) ++ fr")")
   }
 
   protected def characteristics_and(values: List[String], upper: Boolean = true) = {
@@ -97,7 +98,6 @@ trait BasicGEO{
     ) ++ fr"ORDER BY" ++ field
   }
 }
-
 trait WithSQLite {
   self : BasicGEO =>
 

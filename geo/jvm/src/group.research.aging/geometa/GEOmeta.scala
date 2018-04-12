@@ -16,14 +16,16 @@ import doobie.implicits._
 class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with LogSupport
 {
 
-  protected def makeWhere(species: List[String] = Nil,
-    molecules: List[String] = Nil,
-    sequencers: List[String] = Nil,
-    andLikeCharacteristics: List[String] = Nil,
-    orLikeCharacteristics: List[String] = Nil,
-    limit: Int = 0, offset: Int = 0
+  protected def makeWhere(
+                           species: List[String] = Nil,
+                           molecules: List[String] = Nil,
+                           sequencers: List[String] = Nil,
+                           andLikeCharacteristics: List[String] = Nil,
+                           orLikeCharacteristics: List[String] = Nil,
+                           limit: Int = 0,
+                           offset: Int = 0
                          ): Fragment =
-    Fragments.whereAndOpt( addSpecies(species),
+    Fragments.whereAndOpt(       Some(sequencingTech), addSpecies(species),
       addMolecule(molecules), addSequencer(sequencers),
       characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics))
 
@@ -34,7 +36,8 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                   orLikeCharacteristics: List[String] = Nil,
                  limit: Int = 0, offset: Int = 0) = {
     val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics)
-    run( (sampleSelection ++ where ++ limitation(limit, offset)).query[Sequencing].to[List])
+    val q = (sampleSelection ++ where ++ limitation(limit, offset)).query[Sequencing]
+    run( q.to[List])
   }
 
   protected def get_sequencer(n: String): String =  n.indexOf(" (") match {

@@ -54,15 +54,11 @@ case class Sequencing(
                                   organism_ch1: String,
                                   characteristics_ch1: String,
                                   molecule_ch1: String,
-                                  //label_ch1: String,
                                   treatment_protocol_ch1: Option[String],
-                                  extract_protocol_ch1: String,
-                                  //label_protocol_ch1: String,
-                                  //hyb_protocol: String,
+                                  extract_protocol_ch1: Option[String],
                                   description:  Option[String],
-                                  data_processing: String,
+                                  data_processing: Option[String],
                                   contact: String,
-                                  //supplementary_file: String,
                                   data_row_count: Double,
                                   channel_count: Double,
                                   sequencer: String
@@ -121,16 +117,18 @@ trait BasicGEO{
   protected def likeOrSequencer(values: List[String]): Option[doobie.Fragment] = likesOr(fr"gpl.title", values)
 
 
-  protected def likesAdd(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
+  protected def likeInside(fieldName: Fragment, values: List[String], upper: Boolean) = {
+    val f = if(upper) fr"UPPER("++fieldName ++ fr")" else fieldName
     val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
-    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
-    Some(Fragments.and(frags:_*))
+    cased.map(v=> f ++ fr"LIKE ${v}")
+  }
+
+  protected def likesAdd(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
+    Some(fr"(" ++Fragments.and(likeInside(fieldName, values, upper):_*) ++ fr")")
   }
 
   protected def likesOr(fieldName: Fragment, values: List[String], upper: Boolean = true): Option[doobie.Fragment] = if(values.isEmpty) None else {
-    val cased = values.map(v => if(upper)  "%" + v.toUpperCase + "%" else "%" + v + "%")
-    val frags = cased.map(v=> fieldName ++ fr"LIKE ${v}")
-    Some(Fragments.or(frags:_*))
+    Some(fr"(" ++ Fragments.or(likeInside(fieldName, values, upper):_*) ++ fr")")
   }
 
   protected def characteristics_and(values: List[String], upper: Boolean = true) = {
@@ -192,7 +190,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                          ): Fragment =
     Fragments.whereAndOpt( addSpecies(species),
       addMolecule(molecules), addSequencer(sequencers),
-      characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics))
+      characteristics_and(andLikeCharacteristics),  characteristics_or(orLikeCharacteristics))
 
 
   def sequencingQuery(species: List[String] = Nil,
