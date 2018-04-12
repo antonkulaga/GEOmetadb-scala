@@ -2,12 +2,11 @@ package group.research.aging.geometa.web.samples
 
 import group.research.aging.geometa.web.Base
 import group.research.aging.geometa.web.actions
-import group.research.aging.geometa.web.states.SuggestionsInfo
 import mhtml._
 
 import scala.scalajs.js
 
-class SamplesQueryView(suggestions: Rx[SuggestionsInfo], toLoad: Var[actions.ToLoad], updateUI: Var[actions.UpdateUI]) extends Base {
+class SamplesQueryView(suggestions: Rx[actions.SuggestionsInfo], toLoad: Var[actions.ToLoad], updateUI: Var[actions.UpdateUI]) extends Base {
 
   val species: Rx[List[String]] = suggestions.map(_.species)
   val sequencer: Rx[List[String]] = suggestions.map(_.sequencers)
@@ -28,7 +27,9 @@ class SamplesQueryView(suggestions: Rx[SuggestionsInfo], toLoad: Var[actions.ToL
     { sequencer.map(ss =>ss.map(s=>option(s,s))) }
   </select>
 
-
+  lazy val moleculesHTML = <select class="ui fluid search dropdown" multiple="true">
+    { molecules.map(ss =>ss.map(s=>option(s,s))) }
+  </select>
 
   lazy val labels =
       <tr>
@@ -62,7 +63,7 @@ class SamplesQueryView(suggestions: Rx[SuggestionsInfo], toLoad: Var[actions.ToL
         <th></th>
         <th></th>
         <th>{ platformsHTML }</th>
-        <th>{ molecules }</th>
+        <th>{ moleculesHTML }</th>
         <th></th>
         <th></th>
         <th></th>
@@ -79,7 +80,7 @@ class SamplesQueryView(suggestions: Rx[SuggestionsInfo], toLoad: Var[actions.ToL
       { labels }
       { queries }
       {suggestions.map{ q=>
-        if(q!=SuggestionsInfo.empty) updateUI := actions.EvalJS(jsUpdate)
+        if(q!=actions.SuggestionsInfo.empty) updateUI := actions.EvalJS(jsUpdate)
         "" //trying to trigger update
       }}
     </thead>

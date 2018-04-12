@@ -3,7 +3,6 @@ package group.research.aging.geometa.web.samples
 import group.research.aging.geometa.models.Sequencing
 import group.research.aging.geometa.web.Base
 import group.research.aging.geometa.web.actions.{LoadedSequencing, ToLoad, UpdateUI}
-import group.research.aging.geometa.web.states.SuggestionsInfo
 import mhtml.{Rx, Var}
 
 import scala.xml.Elem
@@ -14,7 +13,7 @@ class SamplesView(loadedSequencing: Rx[LoadedSequencing],
   extends Base {
 
 
-  val queryView = new SamplesQueryView(loadedSequencing.map(_.queryInfo).dropRepeats, toLoad, toUpdate)
+  val queryView = new SamplesQueryView(loadedSequencing.map(_.suggestionInfo).dropRepeats, toLoad, toUpdate)
 
 
   val sequencing = loadedSequencing.map(_.sequencing).dropRepeats

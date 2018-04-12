@@ -1,41 +1,20 @@
 package group.research.aging.geometa.web.states
 
 import cats.kernel.Monoid
-import group.research.aging.geometa.web.actions.{ExplainedError, LoadedSequencing}
-import io.circe.generic.JsonCodec
+import group.research.aging.geometa.web.actions
+import io.circe.generic._
 
 import scala.collection.immutable._
 
-object SuggestionsInfo{
-  lazy val empty = SuggestionsInfo(Nil, Nil)
-}
-@JsonCodec case class SuggestionsInfo(
-                                        species: List[String],
-                                        molecules: List[String] = Nil,
-                                        sequencers: List[String] = Nil,
-                                      )
-object QueryParameters {
-  lazy val empty = QueryParameters()
-
-}
-@JsonCodec case class QueryParameters(
-                            species: List[String] = Nil,
-                            molecules: List[String] = Nil,
-                            sequencers: List[String] = Nil,
-                            andLikeCharacteristics: List[String] = Nil,
-                            orLikeCharacteristics: List[String] = Nil,
-                            limit: Int = 0,
-                            offset: Int = 0
-                          )
 
 object Table{
   lazy val empty = Table(Nil, Nil)
 }
-@JsonCodec case class Table(headers: List[String], data: List[List[String]]
-                           )
+@JsonCodec case class Table(headers: List[String], data: List[List[String]])
+
 object State{
 
-  lazy val empty = State("none", LoadedSequencing.empty, Table.empty)
+  lazy val empty = State("none", actions.LoadedSequencing.empty, Table.empty)
 
   implicit def monoid: cats.Monoid[State] = new Monoid[State] {
     override def empty: State = State.empty
@@ -43,10 +22,11 @@ object State{
     override def combine(x: State, y: State): State = y //ugly TODO: rewrite
   }
 }
+
 @JsonCodec case class State (page: String,
-                             sequencing: LoadedSequencing,
+                             sequencing: actions.LoadedSequencing,
                              table: Table = Table.empty,
-                             errors: List[ExplainedError] = Nil)
+                             errors: List[actions.ExplainedError] = Nil)
 
 
 /*

@@ -91,25 +91,28 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     complete(loadPage(page.decode))
   }
 
-  lazy val defaultLimit = 50
+  //lazy val defaultLimit = 50
 
   def view = cache(routeCache, simpleKeyer){pathPrefix("view" / "sequencing") { complete{
-      controller.sequencing(limit = defaultLimit).asJson
+      //controller.sequencing(limit = defaultLimit).asJson
+      controller.loadSequencing(actions.QueryParameters.test)
       }
     }
   }
 
+  /*
 
   def download = cache(routeCache, simpleKeyer){pathPrefix("downloads"){
       pathPrefix("species" / Remaining ){ species =>
 
-        val tsv = controller.sequencing(species = List(species.decode)).asCsv(this.tsvConfig)
+        val tsv = controller.loadSequencing(actions.QueryParameters.test).asCsv(this.tsvConfig)
         complete(
           HttpEntity(ContentTypes.`text/csv(UTF-8)`,tsv)
         )
       }
     }
   }
+  */
 
   def suggest = cache(routeCache, simpleKeyer){
     pathPrefix("suggest"){
@@ -118,7 +121,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
       } ~ path("platforms"){
         complete { controller.all_sequencers().asJson }
       } ~ path("platforms"){
-        complete { controller.all_sequencers().asJson }
+        complete { controller.all_molecules().asJson }
       }
     }
   }
@@ -143,7 +146,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     } ~ mystyles ~
       pathPrefix("pages" / Remaining) { page =>
       complete(loadPage(page.decode))
-    } ~ view ~ download ~ suggest ~
+    } ~ view ~ suggest  ~ //download  ~
       path("public" / Segment){ name =>
         getFromResource(name.toString)
       }

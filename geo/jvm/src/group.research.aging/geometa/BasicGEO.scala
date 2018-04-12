@@ -92,8 +92,15 @@ trait BasicGEO{
     "Heterocephalus glaber", "Caenorhabditis elegans"))
 
   def allBy(field: Fragment) = {
-    sql"SELECT " ++ field ++ fr"FROM gsm sample, gpl " ++ Fragments.whereAndOpt(
+    sql"SELECT DISTINCT " ++ field ++ fr"FROM gsm sample, gpl " ++ Fragments.whereAndOpt(
       Some(sequencingTech)
-    )
+    ) ++ fr"ORDER BY" ++ field
   }
+}
+
+trait WithSQLite {
+  self : BasicGEO =>
+
+  def liteColsQuery(value: String)= sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = $value AND type = 'table'""".query[(String, String)]
+  def liteTableCols(value: String) = run(liteColsQuery(value).to[List])
 }
