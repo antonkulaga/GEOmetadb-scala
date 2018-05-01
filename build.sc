@@ -143,7 +143,8 @@ object web extends Module{
 			ivy"com.typesafe.akka::akka-http-xml:10.1.0",
 			ivy"com.typesafe.akka::akka-http-caching:10.1.0",
 			ivy"de.heikoseeberger::akka-http-circe:1.20.0",
-			ivy"com.pepegar::hammock-akka-http:0.8.3"
+			ivy"com.pepegar::hammock-akka-http:0.8.3",
+			ivy"org.apache.jena:jena-arq:3.7.0"
 		)
 
 	  override def repositories = super.repositories ++ resolvers

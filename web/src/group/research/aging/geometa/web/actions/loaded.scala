@@ -19,9 +19,29 @@ object QueryParameters {
   lazy val test = QueryParameters(
     species = List("Mus musculus", "Bos taurus"),
     molecules = List("total RNA"),
+    sequencers = List("HiSeq", "NovaSeq"),
     andLikeCharacteristics = List("age"),
     orLikeCharacteristics = List("kidney", "liver"),
-    limit = 50
+    limit = 500
+  )
+
+  lazy val mus = QueryParameters(
+    species = List("Mus musculus"),
+    molecules = List("total RNA"),
+    sequencers = List("HiSeq", "NovaSeq"),
+    andLikeCharacteristics = List("age", "tissue"),
+    orLikeCharacteristics = List("liver", "kidney"),
+    limit = 1000
+  )
+
+
+  lazy val taurus = QueryParameters(
+    species = List("Bos taurus"),
+    molecules = List("total RNA"),
+    sequencers = List("HiSeq", "NovaSeq"),
+    andLikeCharacteristics = List("tissue"),
+    orLikeCharacteristics = List("kidney", "liver"),
+    limit =  1000
   )
 
 }

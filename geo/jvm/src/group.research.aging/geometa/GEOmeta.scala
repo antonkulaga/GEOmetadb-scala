@@ -26,7 +26,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                            offset: Int = 0
                          ): Fragment =
     Fragments.whereAndOpt(       Some(sequencingTech), addSpecies(species),
-      addMolecule(molecules), addSequencer(sequencers),
+      addMolecule(molecules), likeOrSequencer(sequencers),
       characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics))
 
   def sequencing( species: List[String] = Nil,

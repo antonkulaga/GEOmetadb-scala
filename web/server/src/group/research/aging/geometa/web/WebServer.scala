@@ -95,12 +95,21 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
 
   def view = cache(routeCache, simpleKeyer){pathPrefix("view" / "sequencing") { complete{
       //controller.sequencing(limit = defaultLimit).asJson
-      controller.loadSequencing(actions.QueryParameters.test)
+      controller.loadSequencing(actions.QueryParameters.mus)
       }
     }
   }
 
   /*
+
+  def mau_tau = cache(routeCache, simpleKeyer){
+    pathPrefix("view" / "mus") { complete{
+      controller.loadSequencing(actions.QueryParameters.mus)
+      }
+    } ~ pathPrefix("view" / "tau") { complete{
+      controller.loadSequencing(actions.QueryParameters.taurus) }
+    }
+    }
 
   def download = cache(routeCache, simpleKeyer){pathPrefix("downloads"){
       pathPrefix("species" / Remaining ){ species =>
