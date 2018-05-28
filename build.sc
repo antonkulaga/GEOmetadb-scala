@@ -7,9 +7,9 @@ import scalajslib._
 import ammonite.ops._
 import coursier.maven.MavenRepository
 
-val scala_version = "2.12.4"
+val scala_version = "2.12.6"
 
-val scala_js_version = "0.6.22"
+val scala_js_version = "0.6.23"
 
 val src = "src"
 
@@ -35,7 +35,7 @@ object geo extends Module {
     ivy"io.circe::circe-generic:0.9.3",
     ivy"io.circe::circe-generic-extras:0.9.3",
     ivy"io.circe::circe-parser:0.9.3",
-		ivy"org.wvlet.airframe::airframe-log::0.41"
+    ivy"org.wvlet.airframe::airframe-log::0.48"
 	)
 
   object js extends ScalaJSModule {
@@ -74,11 +74,10 @@ object geo extends Module {
       ivy"org.postgresql:postgresql:9.4.1208",
       ivy"com.kailuowang::henkan-convert:0.6.1",
       ivy"com.kailuowang::henkan-optional:0.6.1",
-      ivy"org.tpolecat::doobie-core:0.5.2",
-			ivy"org.tpolecat::doobie-postgres:0.5.2",
-			ivy"org.tpolecat::doobie-hikari:0.5.2"
+      ivy"org.tpolecat::doobie-core:0.5.3",
+      ivy"org.tpolecat::doobie-postgres:0.5.3",
+      ivy"org.tpolecat::doobie-hikari:0.5.3"
     )
-
 
     override def scalacPluginIvyDeps = plugins
 
@@ -90,15 +89,14 @@ object web extends Module{
 	self=>
 
   lazy val ivyDeps =  Agg(
-    ivy"com.pepegar::hammock-core::0.8.3",
-    ivy"com.pepegar::hammock-circe::0.8.3",
+    ivy"com.pepegar::hammock-core::0.8.4",
+    ivy"com.pepegar::hammock-circe::0.8.4",
     ivy"com.github.japgolly.scalacss::core::0.5.5",
-		ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
-		ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
-		ivy"group.research.aging::cromwell-client::0.0.13",
+    ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
+    ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
+    ivy"group.research.aging::cromwell-client::0.0.13",
     ivy"io.lemonlabs::scala-uri::1.1.1"
   )
-
 	object client extends ScalaJSModule {
 	  def scalaVersion = scala_version
 
@@ -111,9 +109,9 @@ object web extends Module{
 	  override def repositories = super.repositories ++ resolvers
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
-			ivy"org.scala-js::scalajs-dom::0.9.4",
-      ivy"in.nvilla::monadic-html::0.4.0-RC1",
-			ivy"org.querki::jquery-facade::1.2"
+		ivy"org.scala-js::scalajs-dom::0.9.6",
+                ivy"in.nvilla::monadic-html::0.4.0-RC1",
+		ivy"org.querki::jquery-facade::1.2"
 	  )
 
 	 override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ plugins
@@ -139,10 +137,10 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 			ivy"com.typesafe.akka::akka-stream:2.5.11",
-			ivy"com.typesafe.akka::akka-http:10.1.0",
-			ivy"com.typesafe.akka::akka-http-xml:10.1.0",
-			ivy"com.typesafe.akka::akka-http-caching:10.1.0",
-			ivy"de.heikoseeberger::akka-http-circe:1.20.0",
+			ivy"com.typesafe.akka::akka-http:10.1.1",
+			ivy"com.typesafe.akka::akka-http-xml:10.1.1",
+			ivy"com.typesafe.akka::akka-http-caching:10.1.1",
+			ivy"de.heikoseeberger::akka-http-circe:1.21.0",
 			ivy"com.pepegar::hammock-akka-http:0.8.3",
 			ivy"org.apache.jena:jena-arq:3.7.0"
 		)
@@ -164,8 +162,7 @@ object web extends Module{
 
 	  object test extends Tests{
 
-		override def ivyDeps = Agg(
-		  ivy"io.getquill::quill:2.3.3",
+		override def ivyDeps = Agg(		  
 		  ivy"org.scalatest::scalatest:3.0.5"
 		)
 
