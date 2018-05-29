@@ -1,18 +1,6 @@
 package group.research.aging.geometa
 
-import io.getquill.{Literal, SqliteJdbcContext}
-
-import io.getquill.Embedded
-import shapeless._
-import record._
-import ops.record._
-import syntax.singleton._
-import io.circe.generic.JsonCodec
-import io.circe.generic.extras._
-
-import shapeless.{Poly1, _}
-import shapeless.ops.hlist._
-import shapeless.ops.record._
+import shapeless.Poly1
 
 object NotNull extends Poly1 {
 

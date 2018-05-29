@@ -59,4 +59,5 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
 
   def all_molecules() = run(allBy(fr"sample.molecule_ch1").query[String].to[List])
   def all_species() = run(allBy(fr"gpl.organism").query[String].to[List]).flatMap(s=>s.split("\t").map(_.trim)).distinct
+  
 }

@@ -6,6 +6,7 @@ import mill.scalalib._
 import scalajslib._
 import ammonite.ops._
 import coursier.maven.MavenRepository
+import mill.scalalib.publish.{Developer, License, PomSettings, VersionControl}
 
 val scala_version = "2.12.6"
 
@@ -55,7 +56,7 @@ object geo extends Module {
 
   }
 
-  object jvm extends ScalaModule{
+  object jvm extends ScalaModule with PublishModule {
     def scalaVersion = scala_version
 
     override def repositories = super.repositories ++ resolvers
@@ -68,9 +69,7 @@ object geo extends Module {
 		)
 
     override def ivyDeps = geo_ivy_deps ++ Agg(
-      ivy"io.getquill::quill:2.3.3",
-			ivy"io.getquill::quill-jdbc:2.3.3",
-			ivy"org.xerial:sqlite-jdbc:3.18.0",
+  		ivy"org.xerial:sqlite-jdbc:3.18.0",
       ivy"org.postgresql:postgresql:9.4.1208",
       ivy"com.kailuowang::henkan-convert:0.6.1",
       ivy"com.kailuowang::henkan-optional:0.6.1",
@@ -81,7 +80,20 @@ object geo extends Module {
 
     override def scalacPluginIvyDeps = plugins
 
-  }
+
+		override def pomSettings =  PomSettings(
+			description = "GEOmetadbLite",
+			organization = "group.research.aging",
+			url = "https://github.com/antonkulaga/GEOmetadb-scala",
+			licenses = Seq(License.`MPL-2.0`),
+			versionControl = VersionControl.github("antonkulaga", "GEOmetadb-scala"),
+			developers = Seq(
+				Developer("Kulaga", "Anton","https://github.com/antonkulaga")
+			)
+		)
+
+		override def publishVersion = "0.0.1"
+	}
 }
 
 object web extends Module{
@@ -97,6 +109,18 @@ object web extends Module{
     ivy"group.research.aging::cromwell-client::0.0.13",
     ivy"io.lemonlabs::scala-uri::1.1.1"
   )
+
+
+ def postgres() = T.command{
+					 import ammonite.ops._
+					 //%("javac", sources().map(_.path.toString()), "-d", T.ctx().dest)(wd = T.ctx().dest)
+						 //PathRef(T.ctx().dest)
+					 //
+						 val compose = pwd / 'databases / 'postgres
+					 %("docker", "stack", "deploy", "-c", "stack.yml", "postgres")(compose)
+	 }
+
+
 	object client extends ScalaJSModule {
 	  def scalaVersion = scala_version
 

@@ -1,6 +1,5 @@
 package group.research.aging.geometa
 
-
 import shapeless._
 
 import scala.collection.immutable._
@@ -15,7 +14,6 @@ import cats.effect.IO
 import pprint.PPrinter.BlackWhite
 import doobie.hikari._
 import doobie.hikari.implicits._
-
 
 trait BasicGEO{
 
@@ -102,10 +100,4 @@ trait BasicGEO{
       Some(sequencingTech)
     ) ++ fr"ORDER BY" ++ field
   }
-}
-trait WithSQLite {
-  self : BasicGEO =>
-
-  def liteColsQuery(value: String)= sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = $value AND type = 'table'""".query[(String, String)]
-  def liteTableCols(value: String) = run(liteColsQuery(value).to[List])
 }

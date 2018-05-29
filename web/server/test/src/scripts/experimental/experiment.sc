@@ -2,9 +2,6 @@ import $exec.dependencies
 import dependencies._
 import $exec.classes
 import classes._
-import classes.GEOmeta
-
-
 import doobie._
 import doobie.implicits._
 import cats._
@@ -18,6 +15,7 @@ import cats.Reducible._
 import shapeless.record._
 import doobie.util.meta._
 import doobie.util.meta.Meta
+import group.research.aging.geometa.web.actions.QueryParameters
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
 val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
@@ -29,7 +27,7 @@ implicit val transactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTr
     "org.sqlite.JDBC", url, "", ""
   )
 
-val controller = new Controller(transactor)
+val controller = new TestController(transactor)
 
 //def cols(value: String)= sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = $value AND type = 'table'""".query[(String, String)]
 
