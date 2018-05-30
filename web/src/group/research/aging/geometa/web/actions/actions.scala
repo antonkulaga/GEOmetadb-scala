@@ -13,11 +13,11 @@ case object NothingToLoad extends ToLoad
 @JsonCodec case class LoadAjax(url: String) extends ToLoad
 
 
-object LoadPage {
-  lazy val test = LoadPage("test")
+object LoadPageData {
+  lazy val test = LoadPageData("test")
 }
 
-@JsonCodec case class LoadPage(name: String) extends ToLoad
+@JsonCodec case class LoadPageData(name: String, parameters: List[String] = Nil) extends ToLoad
 
 object Search{
   lazy val empty = Search(Map.empty)

@@ -22,20 +22,33 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                            sequencers: List[String] = Nil,
                            andLikeCharacteristics: List[String] = Nil,
                            orLikeCharacteristics: List[String] = Nil,
+                           series: List[String] = Nil,
                            limit: Int = 0,
                            offset: Int = 0
                          ): Fragment =
     Fragments.whereAndOpt(       Some(sequencingTech), addSpecies(species),
       addMolecule(molecules), likeOrSequencer(sequencers),
-      characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics))
+      characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics), this.addSeries(series))
 
+  /**
+    * Loads sequencing with filtering parameters
+    * @param species
+    * @param molecules
+    * @param sequencers
+    * @param andLikeCharacteristics
+    * @param orLikeCharacteristics
+    * @param limit
+    * @param offset
+    * @return
+    */
   def sequencing( species: List[String] = Nil,
                   molecules: List[String] = Nil,
                   sequencers: List[String] = Nil,
                   andLikeCharacteristics: List[String] = Nil,
                   orLikeCharacteristics: List[String] = Nil,
+                  series: List[String] = Nil,
                  limit: Int = 0, offset: Int = 0) = {
-    val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics)
+    val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics, series)
     val q = (sampleSelection ++ where ++ limitation(limit, offset)).query[Sequencing]
     run( q.to[List])
   }

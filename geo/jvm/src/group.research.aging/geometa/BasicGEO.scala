@@ -44,6 +44,8 @@ trait BasicGEO{
 
   def not(fragment: Option[Fragment]): Option[doobie.Fragment] = fragment.map(frag=> fr"NOT ("++ frag ++ fr")")
 
+  protected def addSeries(values: List[String]) = addInOpt(fr"sample.series_id", values)
+
   protected def addSpecies(values: List[String]) = addInOpt(fr"sample.organism_ch1", values)
   protected def notInExtraction(values: List[String]) = addInOpt(fr"sample.extract_protocol_ch1", values)
   protected def addMolecule(values: List[String]) = addInOpt(fr"sample.molecule_ch1", values)

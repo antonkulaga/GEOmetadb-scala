@@ -24,6 +24,17 @@ val resolvers =  Seq(
 
 val plugins = Agg(ivy"org.scalamacros:::paradise:2.1.1")
 
+val generalPomSettings =  PomSettings(
+	description = "GEOmetadbLite",
+	organization = "group.research.aging",
+	url = "https://github.com/antonkulaga/GEOmetadb-scala",
+	licenses = Seq(License.`MPL-2.0`),
+	versionControl = VersionControl.github("antonkulaga", "GEOmetadb-scala"),
+	developers = Seq(
+		Developer("Kulaga", "Anton","https://github.com/antonkulaga")
+	)
+)
+
 object geo extends Module {
 
   self =>
@@ -81,16 +92,7 @@ object geo extends Module {
     override def scalacPluginIvyDeps = plugins
 
 
-		override def pomSettings =  PomSettings(
-			description = "GEOmetadbLite",
-			organization = "group.research.aging",
-			url = "https://github.com/antonkulaga/GEOmetadb-scala",
-			licenses = Seq(License.`MPL-2.0`),
-			versionControl = VersionControl.github("antonkulaga", "GEOmetadb-scala"),
-			developers = Seq(
-				Developer("Kulaga", "Anton","https://github.com/antonkulaga")
-			)
-		)
+		override def pomSettings =  generalPomSettings
 
 		override def publishVersion = "0.0.1"
 	}
@@ -106,19 +108,19 @@ object web extends Module{
     ivy"com.github.japgolly.scalacss::core::0.5.5",
     ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
     ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
-    ivy"group.research.aging::cromwell-client::0.0.13",
+ //   ivy"group.research.aging::cromwell-client::0.0.13",
     ivy"io.lemonlabs::scala-uri::1.1.1"
   )
 
 
- def postgres() = T.command{
+	def postgres() = T.command{
 					 import ammonite.ops._
 					 //%("javac", sources().map(_.path.toString()), "-d", T.ctx().dest)(wd = T.ctx().dest)
 						 //PathRef(T.ctx().dest)
 					 //
 						 val compose = pwd / 'databases / 'postgres
 					 %("docker", "stack", "deploy", "-c", "stack.yml", "postgres")(compose)
-	 }
+	}
 
 
 	object client extends ScalaJSModule {
@@ -134,7 +136,7 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 		ivy"org.scala-js::scalajs-dom::0.9.6",
-                ivy"in.nvilla::monadic-html::0.4.0-RC1",
+    ivy"in.nvilla::monadic-html::0.4.0-RC1",
 		ivy"org.querki::jquery-facade::1.2"
 	  )
 
@@ -153,7 +155,7 @@ object web extends Module{
 	
 	}
 
-	object server extends ScalaModule {
+	object server extends ScalaModule with PublishModule{
 
 	  override def moduleDeps = Seq(geo.jvm)
 
@@ -192,6 +194,11 @@ object web extends Module{
 
 		def testFrameworks = Seq("org.scalatest.tools.Framework")
 	  }
+
+		override def pomSettings =  generalPomSettings
+
+		override def publishVersion = "0.0.1"
+
 
 	}
 }

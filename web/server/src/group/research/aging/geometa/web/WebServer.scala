@@ -3,7 +3,7 @@ package group.research.aging.geometa.web
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.Authorization
+import akka.http.scaladsl.model.headers.{Authorization, ContentDispositionTypes}
 import akka.http.scaladsl.server.directives.CachingDirectives
 import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
@@ -19,6 +19,7 @@ import cats.effect.IO
 import kantan.csv._
 import kantan.csv.ops._
 import kantan.csv.generic._
+import akka.http.scaladsl.model.headers._
 
 import doobie.hikari._
 
@@ -57,6 +58,12 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
 
   def un(str: String) = scala.xml.Unparsed(str)
 
+  /**
+    * Rendsers HTML page and calls AJAX method to load the data
+    * @param page
+    * @param parameters
+    * @return
+    */
   def loadPage(page: String, parameters: String*) =
     <html>
       <head>
@@ -93,10 +100,36 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
 
   //lazy val defaultLimit = 50
 
-  def view = cache(routeCache, simpleKeyer){pathPrefix("view" / "sequencing") { complete{
+  def data = cache(routeCache, simpleKeyer){
+    pathPrefix("data" / "sequencing") { complete{
       //controller.sequencing(limit = defaultLimit).asJson
       controller.loadSequencing(actions.QueryParameters.mus)
       }
+    } ~ pathPrefix("data" / "gse" / Remaining) { series => complete{
+      //controller.sequencing(limit = defaultLimit).asJson
+      val gse = series.split('-').filter(_!="").toList
+      controller.loadSequencing(actions.QueryParameters.empty.copy(series = gse))
+      }
+    } ~ pathPrefix("tsv" / "sequencing") { complete{
+      //controller.sequencing(limit = defaultLimit).asJson
+      //controller.loadSequencing(actions.QueryParameters.mus)
+      List("")
+    }
+    } ~ pathPrefix("tsv" / "gse" / Remaining) { series => complete{
+      //controller.sequencing(limit = defaultLimit).asJson
+      val gse = series.split('-').filter(_!="").toList
+      val loaded = controller.loadSequencing(actions.QueryParameters.empty.copy(series = gse))
+      val str = loaded.sequencing.map(l=>l.asStringList.mkString("\t"))
+      str
+    }
+    } ~ pathPrefix("temp" / Remaining) { series => complete{
+      //controller.sequencing(limit = defaultLimit).asJson
+      val gse = series.split('-').filter(_!="").toList
+      val loaded = controller.loadSequencing(actions.QueryParameters.rna.copy(series = gse))
+      val header = "GSM\tGSE\tSpecies\tSequencer\tType\tSex\tAge\tTissue\tExtracted molecule\tStrain\tComments"
+      val result = header::loaded.sequencing.map(l=>l.gsm + "\t" + l.series_id + "\t" + l.organism_ch1 + "\t" + l.sequencer + "\tNA\tNA\tNA\tNA\tNA\tNA\tNA")   
+      HttpResponse(  entity = HttpEntity(MediaTypes.`text/csv`.withCharset(HttpCharsets.`UTF-8`),  result.foldLeft(""){ case (acc, el)=> acc + el + "\n"}   ))
+    }
     }
   }
 
@@ -155,7 +188,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     } ~ mystyles ~
       pathPrefix("pages" / Remaining) { page =>
       complete(loadPage(page.decode))
-    } ~ view ~ suggest  ~ //download  ~
+    } ~ data ~ suggest  ~ //download  ~
       path("public" / Segment){ name =>
         getFromResource(name.toString)
       }

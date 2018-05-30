@@ -34,6 +34,11 @@ object QueryParameters {
     limit = 1000
   )
 
+  lazy val rna = QueryParameters(
+    molecules = List("total RNA", "mRNA"),
+   limit = 10000
+  )
+
 
   lazy val taurus = QueryParameters(
     species = List("Bos taurus"),
@@ -51,6 +56,7 @@ object QueryParameters {
                                        sequencers: List[String] = Nil,
                                        andLikeCharacteristics: List[String] = Nil,
                                        orLikeCharacteristics: List[String] = Nil,
+                                       series: List[String] = Nil,
                                        limit: Int = 50,
                                        offset: Int = 0
                                      ) extends Action

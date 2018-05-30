@@ -50,7 +50,7 @@ object MainJS extends Base{
 	  //dom.window.alert(page)
     val pString = parameters.foldLeft(""){ case (acc, el) => acc + " " + el}
     info(s"GEOmetadb Web applications loaded:\n page = ${page} \nwith parameters = ${pString}")
-    toLoad := actions.LoadPage(page)
+    toLoad := actions.LoadPageData(page)
   }
 
 
@@ -83,8 +83,10 @@ object MainJS extends Base{
                     actions.NothingLoaded |
                     actions.NotUpdateUI) => previous
 
-    case (previous, actions.LoadPage(page)) =>
-      val u = Uri(path = s"/view/${page}")
+    case (previous, actions.LoadPageData(page, parameters)) =>
+      val pms = if(parameters.isEmpty) "" else "/" + parameters.mkString("-")
+      val path = s"/data/${page + pms}"
+      val u = Uri(path = path)
       Hammock.request(Method.GET, u, Map.empty)
         .as[actions.LoadedSequencing]
         .exec[IO].unsafeToFuture()
@@ -95,7 +97,7 @@ object MainJS extends Base{
             error(th)
             throwError := actions.ExplainedError(s"loading page ${page} with uri ${u} failed", th.getMessage)
         }
-      previous.copy(page = page)
+      previous.copy(page = page, parameters = parameters)
 
     case (previous, seq: actions.LoadedSequencing) =>
       //val data_new: List[List[String]] = samples.map(s=>s.asStringList)

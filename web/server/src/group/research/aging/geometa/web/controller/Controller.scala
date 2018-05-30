@@ -12,26 +12,13 @@ import doobie._
 import doobie.hikari._
 import doobie.implicits._
 
+import scala.collection.immutable.{List, Nil}
+
 class Controller(transactor: IO[HikariTransactor[IO]]) extends GEOmeta(transactor) with WithSQLite {
 
   // Set the default log formatter
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
-
-  override protected def makeWhere(
-                           species: List[String] = Nil,
-                           molecules: List[String] = Nil,
-                           sequencers: List[String] = Nil,
-                           andLikeCharacteristics: List[String] = Nil,
-                           orLikeCharacteristics: List[String] = Nil,
-                           limit: Int = 0,
-                           offset: Int = 0
-                         ): Fragment = {
-    Fragments.whereAndOpt(Some(sequencingTech), addSpecies(species),
-      not(likesOr(fr"sample.extract_protocol_ch1", List("mRNA", "poly-A"))),
-      addMolecule(molecules), likeOrSequencer(sequencers),
-      characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics))
-  }
 
   def loadSequencing(
                       parameters: actions.QueryParameters
@@ -42,6 +29,7 @@ class Controller(transactor: IO[HikariTransactor[IO]]) extends GEOmeta(transacto
       sequencers = parameters.sequencers,
       andLikeCharacteristics = parameters.andLikeCharacteristics,
       orLikeCharacteristics = parameters.orLikeCharacteristics,
+      series = parameters.series,
       limit = parameters.limit,
       offset = parameters.offset)
     val suggestions = actions.SuggestionsInfo.empty//actions.SuggestionsInfo(super.all_species().toList, super.all_sequencers().toList, super.all_molecules().toList) //TODO: fix collections

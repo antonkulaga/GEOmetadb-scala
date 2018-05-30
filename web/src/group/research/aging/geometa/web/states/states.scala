@@ -26,7 +26,9 @@ object State{
 @JsonCodec case class State (page: String,
                              sequencing: actions.LoadedSequencing,
                              table: Table = Table.empty,
-                             errors: List[actions.ExplainedError] = Nil)
+                             errors: List[actions.ExplainedError] = Nil,
+                             parameters: List[String] = Nil
+                            )
 
 
 /*
