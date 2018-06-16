@@ -94,7 +94,7 @@ object geo extends Module {
 
 		override def pomSettings =  generalPomSettings
 
-		override def publishVersion = "0.0.1"
+		override def publishVersion = "0.0.2"
 	}
 }
 
@@ -114,12 +114,9 @@ object web extends Module{
 
 
 	def postgres() = T.command{
-					 import ammonite.ops._
-					 //%("javac", sources().map(_.path.toString()), "-d", T.ctx().dest)(wd = T.ctx().dest)
-						 //PathRef(T.ctx().dest)
-					 //
-						 val compose = pwd / 'databases / 'postgres
-					 %("docker", "stack", "deploy", "-c", "stack.yml", "postgres")(compose)
+		import ammonite.ops._
+		val compose = pwd / 'databases / 'postgres
+		%("docker", "stack", "deploy", "-c", "docker-compose.yml", "postgres")(compose)
 	}
 
 
@@ -197,7 +194,7 @@ object web extends Module{
 
 		override def pomSettings =  generalPomSettings
 
-		override def publishVersion = "0.0.1"
+		override def publishVersion = "0.0.2"
 
 
 	}

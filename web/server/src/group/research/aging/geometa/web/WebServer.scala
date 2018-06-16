@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers.{Authorization, ContentDispositionTypes}
 import akka.http.scaladsl.server.directives.CachingDirectives
 import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import group.research.aging.geometa.sequencing.Converter
 import group.research.aging.geometa.web.controller.Controller
 import group.research.aging.util.PercentDecoder._
 import kantan.csv.{CsvConfiguration, rfc}
@@ -31,11 +32,17 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
    lazy val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
 
-  implicit val hikari: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+  val sqliteTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
     "org.sqlite.JDBC", url, "", ""
   )
 
-  val controller = new Controller(hikari)
+  val postgresTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+    "org.postgresql.Driver", url = "jdbc:postgresql://127.0.0.1:5432/sequencing", "postgres", "changeme"
+  )
+
+  val controller = new Controller(sqliteTransactor)
+
+  val converter = new Converter(controller, postgresTransactor)
 
   implicit val cacheSystem = ActorSystem("cacheSystem")
 

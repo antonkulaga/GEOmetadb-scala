@@ -1,49 +1,60 @@
-import $exec.dependencies
-import dependencies._
 import $exec.classes
-import classes._
-import doobie._
-import doobie.implicits._
-import cats._
-import cats.data._
+import $exec.dependencies
 import cats.effect.IO
 import cats.implicits._
+import doobie._
+import doobie.hikari.HikariTransactor
+import doobie.implicits._
+import doobie.util.meta.Meta
+import doobie.util.transactor
 import pprint.PPrinter.BlackWhite
 import doobie.hikari._
-import doobie.hikari.implicits._
-import cats.Reducible._
-import shapeless.record._
-import doobie.util.meta._
-import doobie.util.meta.Meta
-import group.research.aging.geometa.web.actions.QueryParameters
+import group.research.aging.geometa.{GEOmeta, QueryRunner}
+import group.research.aging.geometa.sequencing._
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
-val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
+val sqliteConnectionURL = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
+val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/postgres" //sequencing
+
+
 implicit val mstr = Meta[String]
 
+class ConverterExperimental(original: GEOmeta, transactor: IO[HikariTransactor[IO]])  extends Converter(original, transactor)
+{
+  override def insertFieldQuery(table: String, column: String, values: List[String]) = {
+    val sql = s"INSERT INTO ${table} (${column}) values (?)"
+    Update[String](sql).updateManyWithGeneratedKeys[String](column)(values)
+  }
+}
+val transactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+   "org.postgresql.Driver", url = postgresConnectionURL, "postgres", "changeme"
+)
 
+val controller = new GEOmeta(HikariTransactor.newHikariTransactor[IO]("org.sqlite.JDBC", sqliteConnectionURL, "", ""))
+val converter: Converter = new ConverterExperimental(controller, transactor)
 
-implicit val transactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
-    "org.sqlite.JDBC", url, "", ""
-  )
+//controller.run(insertModels(List("one", "two", "three", "four")).compile.drain)
+//BlackWhite.pprintln(converter.original.all_molecules())
+//println("===")
+//BlackWhite.pprintln(converter.original.all_species())
 
-val controller = new TestController(transactor)
+//println(converter.cleanSequencers())
+println("===cleaning===")
+BlackWhite.pprintln(converter.cleanSequencers())
+BlackWhite.pprintln(converter.cleanMolecules())
+BlackWhite.pprintln(converter.cleanOrganisms())
 
-//def cols(value: String)= sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = $value AND type = 'table'""".query[(String, String)]
+println("===sequencers===")
+BlackWhite.pprintln(converter.allSequencers())
+BlackWhite.pprintln(converter.addSequencers())
+BlackWhite.pprintln(converter.allSequencers())
+println("===organisms===")
+BlackWhite.pprintln(converter.run(converter.countQuery("organisms")))
+BlackWhite.pprintln(converter.addOrganisms())
+BlackWhite.pprintln(converter.run(converter.countQuery("organisms")))
+println("===molecules===")
 
-
-//val q = sql"""SELECT name, sql FROM sqlite_master WHERE tbl_name = 'gsm' AND type = 'table'""".query[(String, String)]
-//controller.run(controller.loadSequencingQuery(QueryParameters.test).to[List])
-
-BlackWhite.pprintln(controller.run(controller.loadSequencingQuery(QueryParameters.test).to[List]))
-//BlackWhite.pprintln(controller.all_molecules())
-//println("====================================")
-//BlackWhite.pprintln(controller.all_species())
-//println("====================================")
-//BlackWhite.pprintln(controller.all_sequencers())
-//println("====================================")
-/*
-//controller.debug(q)
-//BlackWhite.pprintln(controller.run(q.to[List]))
-//BlackWhite.pprintln(controller.run(cols("gsm").to[List]))
-*/
+BlackWhite.pprintln(converter.run(converter.countQuery("molecules")))
+BlackWhite.pprintln(converter.addMolecules())
+BlackWhite.pprintln(converter.run(converter.countQuery("molecules")))
+println("----DONE--------")

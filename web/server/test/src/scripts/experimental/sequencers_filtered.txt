@@ -1,0 +1,45 @@
+454 gs
+454 gs 20
+454 gs flx
+454 gs flx titanium
+454 gs flx+
+454 gs junior
+ab 5500 genetic analyzer
+ab 5500xl genetic analyzer
+ab 5500xl-w genetic analysis system
+ab solid 3 plus system
+ab solid 4 system
+ab solid 4hq system
+ab solid 5500
+ab solid 5500xl solid system
+ab solid system
+ab solid system 2.0
+ab solid system 3.0
+bgiseq-500
+complete genomics
+helicos heliscope
+hiseq x five
+hiseq x ten
+illumina genome analyzer
+illumina genome analyzer ii
+illumina genome analyzer iix
+illumina hiscansq
+illumina hiseq 1000
+illumina hiseq 1500
+illumina hiseq 2000
+illumina hiseq 2500
+illumina hiseq 3000
+illumina hiseq 4000
+illumina miniseq
+illumina miseq
+illumina nextseq 500
+illumina novaseq 6000
+ion torrent pgm
+ion torrent proton
+ion torrent s5
+ion torrent s5 xl
+minion
+nextseq 550
+pacbio rs
+pacbio rs ii
+sequel

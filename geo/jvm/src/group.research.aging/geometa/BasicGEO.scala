@@ -15,21 +15,7 @@ import pprint.PPrinter.BlackWhite
 import doobie.hikari._
 import doobie.hikari.implicits._
 
-trait BasicGEO{
-
-  def transactor: IO[HikariTransactor[IO]]
-
-  def run[T](q: doobie.ConnectionIO[T]): T =
-    (for{ xa <- transactor ; selection <- q.transact(xa)} yield selection).unsafeRunSync
-
-  def debug[T](q: Query0[T])=
-    {
-      transactor.flatMap{ xa =>
-        val y = xa.yolo
-        import y._
-        q.check
-      }
-    }.unsafeRunSync()
+trait BasicGEO extends QueryRunner{
 
   lazy val technology: String = "high-throughput sequencing"
   lazy val sequencingTech = Fragments.and(fr"sample.gpl = gpl.gpl", fr"gpl.technology = ${technology}")

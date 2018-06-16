@@ -11,6 +11,7 @@ import wvlet.log.{LogLevel, Logger}
 import doobie._
 import doobie.hikari._
 import doobie.implicits._
+import group.research.aging.geometa.web.actions.LoadedSequencing
 
 import scala.collection.immutable.{List, Nil}
 
@@ -22,7 +23,7 @@ class Controller(transactor: IO[HikariTransactor[IO]]) extends GEOmeta(transacto
 
   def loadSequencing(
                       parameters: actions.QueryParameters
-                    ) = {
+                    ): LoadedSequencing = {
     val gsms = sequencing(
       species = parameters.species,
       molecules = parameters.molecules,

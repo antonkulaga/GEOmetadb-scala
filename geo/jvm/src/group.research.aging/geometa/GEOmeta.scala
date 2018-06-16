@@ -47,7 +47,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                   andLikeCharacteristics: List[String] = Nil,
                   orLikeCharacteristics: List[String] = Nil,
                   series: List[String] = Nil,
-                 limit: Int = 0, offset: Int = 0) = {
+                 limit: Int = 0, offset: Int = 0): List[Sequencing] = {
     val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics, series)
     val q = (sampleSelection ++ where ++ limitation(limit, offset)).query[Sequencing]
     run( q.to[List])
@@ -58,12 +58,20 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
     case v => n.substring(0, v).toLowerCase
   }
 
+  def gpl2sequencer() = {
+    val q: doobie.ConnectionIO[List[String]] =
+      sql"""SELECT DISTINCT gpl.ID, gpl.gpl.title, gpl.gpl
+        FROM gpl
+        WHERE gpl.technology = ${technology}
+        ;""".query[String].to[List]
+
+  }
 
   def all_sequencers() = {
     val q: doobie.ConnectionIO[List[String]] =
       sql"""SELECT DISTINCT gpl.title
         FROM gpl
-        WHERE AND gpl.technology = ${technology}
+        WHERE gpl.technology = ${technology}
         ;""".query[String].to[List]
     val list = run(q).map(get_sequencer)
     SortedSet(list:_*)
