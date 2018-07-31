@@ -6,7 +6,7 @@ import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import group.research.aging.geometa.original.GEOmeta
 
-class Converter(val original: GEOmeta, val sequencing: GEOmetaSequencing)
+class Converter(val original: GEOmeta, val sequencing: SequencingLoader)
 {
 
 

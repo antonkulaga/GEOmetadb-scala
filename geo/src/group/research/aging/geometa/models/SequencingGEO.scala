@@ -10,31 +10,18 @@ import shapeless._
 import shapeless.Poly1
 
 
-object Sequencing {
+object SequencingGEO {
 
-  val labeledGen =  LabelledGeneric[Sequencing]
+  val labeledGen =  LabelledGeneric[SequencingGEO]
 
-  val gen = Generic[Sequencing]
+  val gen = Generic[SequencingGEO]
 
-  /*
-  def fromGSM(gsm: Tables.gsm, technology: String): Sequencing = {
-    val record  = Tables.gsm.labeledGen.to(gsm)
-    val recSmall = (record - 'source_name_ch2 -'organism_ch2 -
-      'characteristics_ch2 - 'molecule_ch2 - 'label_ch2 -
-      'treatment_protocol_ch2 - 'extract_protocol_ch2 -'label_protocol_ch2) -
-      'hyb_protocol - 'label_protocol_ch1 - 'label_ch1 - 'supplementary_file
-    val recNew = recSmall + ('sequencer ->> technology)
-    val r = labeledGen.from(recNew)
-    gen.from(gen.to(r).map(NotNull))
-  }
-  */
-
-
-  def asMap(seq_gsm: Sequencing) = labeledGen.to(seq_gsm).toMap
+  def asMap(seq_gsm: SequencingGEO) = labeledGen.to(seq_gsm).toMap
 
 }
 
-@JsonCodec case class Sequencing(
+
+@JsonCodec case class SequencingGEO(
                                   ID: String,
                                   title: String,
                                   gsm: String,
@@ -58,12 +45,12 @@ object Sequencing {
                                   sequencer: String
                                 ){
 
-  lazy val asRecord = Sequencing.labeledGen.to(this)
+  lazy val asRecord = SequencingGEO.labeledGen.to(this)
   def asMap = asRecord.toMap
   def keys = asRecord.keys
   def fieldNames = keys.toList.map(_.toString.replace("'", ""))
 
-  lazy val asGen = Sequencing.gen.to(this)
+  lazy val asGen = SequencingGEO.gen.to(this)
   def asList = asGen.toList
   def asStringList = asList.map(_.toString)
 
@@ -72,5 +59,5 @@ object Sequencing {
     case v => n.substring(0, v).toLowerCase
   }
 
-  def withFixedSequencer: Sequencing = this.copy(sequencer = get_sequencer(this.sequencer))
+  def withFixedSequencer: SequencingGEO = this.copy(sequencer = get_sequencer(this.sequencer))
 }

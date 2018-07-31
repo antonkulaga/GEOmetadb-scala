@@ -65,6 +65,7 @@ class QueryBuilderSequencing  extends QueryBuilder{
                            offset: Int = 0
                          ): Fragment =
     Fragments.whereAndOpt(
+      Some(mainCondition),
       withSpecies(species),
       addMolecule(molecules),
       likeOrSequencer(sequencers),

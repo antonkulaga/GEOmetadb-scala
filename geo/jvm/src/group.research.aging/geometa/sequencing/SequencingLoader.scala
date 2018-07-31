@@ -7,15 +7,17 @@ import doobie.implicits._
 import group.research.aging.geometa.models.Sequencing
 import group.research.aging.geometa.core.QueryRunner
 import group.research.aging.geometa.original.{GEOmeta, QueryBuilderGEO}
+import wvlet.log.LoggingMethods
 
 import scala.collection.immutable.{List, Nil}
 
-class GEOmetaSequencing( val transactor: IO[HikariTransactor[IO]])  extends QueryRunner {
+class SequencingLoader(val transactor: IO[HikariTransactor[IO]], defaultLimit: Int = 0)  extends QueryRunner {
 
 
   val builder = new QueryBuilderSequencing
   //import builder._
 
+  protected def debug(value: AnyRef) = println(value)
 
   def sequencing( species: List[String] = Nil,
                   molecules: List[String] = Nil,
@@ -25,8 +27,10 @@ class GEOmetaSequencing( val transactor: IO[HikariTransactor[IO]])  extends Quer
                   series: List[String] = Nil,
                   limit: Int = 0, offset: Int = 0): List[Sequencing] = {
     val where =  builder.makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics, series)
-    val q = (builder.sampleSelection ++ where ++ builder.limitation(limit, offset)).query[Sequencing]
-    run( q.to[List])
+    val q: Fragment = (builder.sampleSelection ++ where ++ builder.limitation(limit, offset))
+    debug(q)
+    val toRun =  q.query[Sequencing].to[List]
+    run( toRun )
   }
 
 

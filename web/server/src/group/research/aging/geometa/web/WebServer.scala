@@ -3,11 +3,10 @@ package group.research.aging.geometa.web
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Authorization, ContentDispositionTypes}
+import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.server.directives.CachingDirectives
 import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import group.research.aging.geometa.sequencing.{Converter, GEOmetaSequencing}
 import group.research.aging.geometa.web.controller.SequencingController
 import group.research.aging.util.PercentDecoder._
 import kantan.csv.{CsvConfiguration, rfc}
@@ -17,14 +16,10 @@ import wvlet.log.{LogLevel, LogSupport, Logger}
 
 import scala.xml.{Elem, Unparsed}
 //import wvlet.log.{LogLevel, LogSupport, Logger}
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 import cats.effect.IO
-import kantan.csv._
-import kantan.csv.ops._
-import kantan.csv.generic._
-import akka.http.scaladsl.model.headers._
-
 import doobie.hikari._
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 // Server definition
 object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with CachingDirectives {

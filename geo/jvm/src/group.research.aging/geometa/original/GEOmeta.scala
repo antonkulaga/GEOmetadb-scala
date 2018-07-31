@@ -47,9 +47,9 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                   andLikeCharacteristics: List[String] = Nil,
                   orLikeCharacteristics: List[String] = Nil,
                   series: List[String] = Nil,
-                 limit: Int = 0, offset: Int = 0): List[Sequencing] = {
+                 limit: Int = 0, offset: Int = 0): List[SequencingGEO] = {
     val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics, series)
-    val q = (sampleSelection ++ where ++ builder.limitation(limit, offset)).query[Sequencing]
+    val q = (sampleSelection ++ where ++ builder.limitation(limit, offset)).query[SequencingGEO]
     run( q.to[List])
   }
 
