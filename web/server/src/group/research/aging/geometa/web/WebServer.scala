@@ -7,13 +7,15 @@ import akka.http.scaladsl.model.headers.{Authorization, ContentDispositionTypes}
 import akka.http.scaladsl.server.directives.CachingDirectives
 import akka.http.scaladsl.server.{HttpApp, RequestContext}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import group.research.aging.geometa.sequencing.Converter
-import group.research.aging.geometa.web.controller.Controller
+import group.research.aging.geometa.sequencing.{Converter, GEOmetaSequencing}
+import group.research.aging.geometa.web.controller.SequencingController
 import group.research.aging.util.PercentDecoder._
 import kantan.csv.{CsvConfiguration, rfc}
 import scalacss.DevDefaults._
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
 import wvlet.log.{LogLevel, LogSupport, Logger}
+
+import scala.xml.{Elem, Unparsed}
 //import wvlet.log.{LogLevel, LogSupport, Logger}
 import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 import cats.effect.IO
@@ -32,17 +34,12 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
    lazy val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
 
-  val sqliteTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
-    "org.sqlite.JDBC", url, "", ""
-  )
-
-  val postgresTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+  implicit val postgresTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
     "org.postgresql.Driver", url = "jdbc:postgresql://127.0.0.1:5432/sequencing", "postgres", "changeme"
   )
 
-  val controller = new Controller(sqliteTransactor)
+  val controller = new SequencingController(postgresTransactor)
 
-  val converter = new Converter(controller, postgresTransactor)
 
   implicit val cacheSystem = ActorSystem("cacheSystem")
 
@@ -63,7 +60,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   implicit val tsvConfig: CsvConfiguration = rfc.withCellSeparator('\t').withHeader(true)
 
 
-  def un(str: String) = scala.xml.Unparsed(str)
+  def un(str: String): Unparsed = scala.xml.Unparsed(str)
 
   /**
     * Rendsers HTML page and calls AJAX method to load the data
@@ -71,7 +68,7 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
     * @param parameters
     * @return
     */
-  def loadPage(page: String, parameters: String*) =
+  def loadPage(page: String, parameters: String*): Elem =
     <html>
       <head>
         <meta charset="utf-8" />
@@ -166,11 +163,11 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   def suggest = cache(routeCache, simpleKeyer){
     pathPrefix("suggest"){
       path("species") {
-        complete { controller.all_species().asJson }
+        complete { controller.allOrganisms().asJson }
       } ~ path("platforms"){
-        complete { controller.all_sequencers().asJson }
+        complete { controller.allSequencers().asJson }
       } ~ path("molecules"){
-        complete { controller.all_molecules().asJson }
+        complete { controller.allMolecules().asJson }
       }
     }
   }

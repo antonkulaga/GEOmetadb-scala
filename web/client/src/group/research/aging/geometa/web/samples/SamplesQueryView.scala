@@ -10,13 +10,13 @@ class SamplesQueryView(suggestions: Rx[actions.SuggestionsInfo], toLoad: Var[act
 
   val species: Rx[List[String]] = suggestions.map(_.species)
   val sequencer: Rx[List[String]] = suggestions.map(_.sequencers)
-  val molecules = suggestions.map(_.molecules)
+  val molecules: Rx[List[String]] = suggestions.map(_.molecules)
 
   val updateFilters = species.merge(sequencer)
 
   def option(value: String, label: String) = <option value={value}>{label}</option>
 
-  val speciesToChoose = species.map(_.nonEmpty)
+  val speciesToChoose: Rx[Boolean] = species.map(_.nonEmpty)
   val platformsToChoose = sequencer.map(_.nonEmpty)
 
   lazy val speciesHTML = <select class="ui fluid search dropdown" multiple="true">

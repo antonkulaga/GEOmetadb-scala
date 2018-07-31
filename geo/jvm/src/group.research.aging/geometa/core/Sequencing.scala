@@ -1,4 +1,4 @@
-package group.research.aging.geometa
+package group.research.aging.geometa.core
 
 import shapeless.Poly1
 

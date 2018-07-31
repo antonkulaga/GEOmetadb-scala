@@ -9,13 +9,12 @@ import doobie.util.meta.Meta
 import doobie.util.transactor
 import pprint.PPrinter.BlackWhite
 import doobie.hikari._
-import group.research.aging.geometa.{GEOmeta, QueryRunner}
+import group.research.aging.geometa.original.GEOmeta
 import group.research.aging.geometa.sequencing._
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
 val sqliteConnectionURL = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
-val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/postgres" //sequencing
-
+val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sequencing" //sequencing
 
 implicit val mstr = Meta[String]
 
@@ -39,19 +38,23 @@ val converter: Converter = new ConverterExperimental(controller, transactor)
 //BlackWhite.pprintln(converter.original.all_species())
 
 //println(converter.cleanSequencers())
+
+/*
 println("===cleaning===")
 BlackWhite.pprintln(converter.cleanSequencers())
 BlackWhite.pprintln(converter.cleanMolecules())
 BlackWhite.pprintln(converter.cleanOrganisms())
 
 println("===sequencers===")
-BlackWhite.pprintln(converter.allSequencers())
 BlackWhite.pprintln(converter.addSequencers())
 BlackWhite.pprintln(converter.allSequencers())
 println("===organisms===")
+
 BlackWhite.pprintln(converter.run(converter.countQuery("organisms")))
 BlackWhite.pprintln(converter.addOrganisms())
 BlackWhite.pprintln(converter.run(converter.countQuery("organisms")))
+*/
+
 println("===molecules===")
 
 BlackWhite.pprintln(converter.run(converter.countQuery("molecules")))

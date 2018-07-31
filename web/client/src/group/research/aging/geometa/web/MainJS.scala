@@ -40,10 +40,7 @@ object MainJS extends Base{
     val newState = reducer(currentState, a)
     if(newState != currentState) state := newState
   }
-
-
   //val state: Rx[states.State] = allActions.foldp(states.State.empty){ case (s, a) => reducer(s, a)}.dropRepeats
-
 
   @JSExport
   def page(page: String, parameters: String*) = {
@@ -52,9 +49,6 @@ object MainJS extends Base{
     info(s"GEOmetadb Web applications loaded:\n page = ${page} \nwith parameters = ${pString}")
     toLoad := actions.LoadPageData(page)
   }
-
-
-  //val species: Rx
 
   val samplesView = new SamplesView(state.map(s=>s.sequencing).dropRepeats, toLoad, updateUI)
   val errorView = new ErrorsView(state.map(s=>s.errors))
@@ -73,8 +67,7 @@ object MainJS extends Base{
   import hammock.marshalling._
   //import io.circe.generic.auto._
 
-  implicit val interpreter = Interpreter[IO]
-
+  implicit val interpreter: Interpreter[IO] = Interpreter[IO]
 
   lazy val loadReducer: Reducer = {
 
@@ -134,7 +127,6 @@ object MainJS extends Base{
     debug(action)
     onReduce(previousState, action)
   }
-
 
   val div = dom.document.getElementById("main")
   mount(div, component)

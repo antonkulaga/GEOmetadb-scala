@@ -1,4 +1,4 @@
-package group.research.aging.geometa
+package group.research.aging.geometa.original
 
 import group.research.aging.geometa.models._
 import wvlet.log.LogSupport
@@ -26,9 +26,9 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                            limit: Int = 0,
                            offset: Int = 0
                          ): Fragment =
-    Fragments.whereAndOpt(       Some(sequencingTech), addSpecies(species),
-      addMolecule(molecules), likeOrSequencer(sequencers),
-      characteristics_and(andLikeCharacteristics), characteristics_or(orLikeCharacteristics), this.addSeries(series))
+    Fragments.whereAndOpt(       Some(sequencingTech), builder.withSpecies(species),
+      builder.addMolecule(molecules), builder.likeOrSequencer(sequencers),
+      builder.characteristics_and(andLikeCharacteristics), builder.characteristics_or(orLikeCharacteristics), builder.withSeries(series))
 
   /**
     * Loads sequencing with filtering parameters
@@ -49,7 +49,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
                   series: List[String] = Nil,
                  limit: Int = 0, offset: Int = 0): List[Sequencing] = {
     val where =  makeWhere(species, molecules, sequencers, andLikeCharacteristics, orLikeCharacteristics, series)
-    val q = (sampleSelection ++ where ++ limitation(limit, offset)).query[Sequencing]
+    val q = (sampleSelection ++ where ++ builder.limitation(limit, offset)).query[Sequencing]
     run( q.to[List])
   }
 
@@ -64,7 +64,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
         FROM gpl
         WHERE gpl.technology = ${technology}
         ;""".query[String].to[List]
-
+    q
   }
 
   def all_sequencers() = {
@@ -77,8 +77,7 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
     SortedSet(list:_*)
   }
 
-
-  def all_molecules() = run(allBy(fr"sample.molecule_ch1").query[String].to[List])
+  def all_molecules() = run(allBy(fr"gsm.molecule_ch1").query[String].to[List])
   def all_species() = run(allBy(fr"gpl.organism").query[String].to[List]).flatMap(s=>s.split("\t").map(_.trim)).distinct
   
 }
