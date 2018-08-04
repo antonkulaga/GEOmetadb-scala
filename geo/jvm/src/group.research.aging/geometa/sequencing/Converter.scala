@@ -9,8 +9,6 @@ import group.research.aging.geometa.original.GEOmeta
 class Converter(val original: GEOmeta, val sequencing: SequencingLoader)
 {
 
-
-
   /*
      "id"  integer DEFAULT nextval('samples_id_seq') NOT NULL,
     "title" text NOT NULL,
@@ -40,7 +38,7 @@ class Converter(val original: GEOmeta, val sequencing: SequencingLoader)
           characteristics, status, submission_date, last_update_date, type, source_name,
           treatment_protocol, extract_protocol, description, data_processing, contact
           )
-         (SELECT
+         (SELECT DISTINCT
           COALESCE(gsm.title, ''), gsm.gsm, gsm.series_id, gsm.gpl, sequencers.id, molecules.id, organisms.id,
           COALESCE(gsm.characteristics_ch1, ''), COALESCE(gsm.status, ''), COALESCE(gsm.submission_date, ''),
           COALESCE(gsm.last_update_date, ''), COALESCE(gsm.type, ''), COALESCE(gsm.source_name_ch1,''),
@@ -84,16 +82,16 @@ class Converter(val original: GEOmeta, val sequencing: SequencingLoader)
     sequencing.insertFieldQuery("organisms", "name", organisms)
   }
 
-  def addSequencers(): Seq[String] = {
+  def addSequencers() = {
     sequencing.run(insertSequencersQuery(original.all_sequencers().toList).compile.toList)
   }
 
-  def addMolecules(): Seq[String] = {
-    sequencing.run(insertMoleculesQuery(original.all_molecules()).compile.toList)
+  def addMolecules() = {
+    sequencing.run(insertMoleculesQuery(original.all_molecules().toList).compile.toList)
   }
 
-  def addOrganisms(): Seq[String] = {
-    sequencing.run(insertOrganismsQuery(original.all_species()).compile.toList)
+  def addOrganisms() = {
+    sequencing.run(insertOrganismsQuery(original.all_species().toList).compile.toList)
   }
 
 

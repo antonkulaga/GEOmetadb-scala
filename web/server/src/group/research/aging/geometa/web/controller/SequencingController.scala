@@ -14,6 +14,8 @@ class SequencingController(transactor: IO[HikariTransactor[IO]]) extends Sequenc
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
 
+  lazy val defaultSuggestions = SuggestionsInfo(allOrganisms(), allMolecules(), allSequencers())
+
   def loadSequencing(
                       parameters: actions.QueryParameters
                     ): LoadedSequencing = {
@@ -21,7 +23,7 @@ class SequencingController(transactor: IO[HikariTransactor[IO]]) extends Sequenc
     val results = sequencing(parameters.species, parameters.molecules, parameters.sequencers,
       parameters.andLikeCharacteristics, parameters.orLikeCharacteristics,
       parameters.series, parameters.limit, parameters.offset)
-    LoadedSequencing(SuggestionsInfo.empty, parameters, results)
+    LoadedSequencing(defaultSuggestions, parameters, results)
   }
 
 

@@ -6,6 +6,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.server.directives.CachingDirectives
 import akka.http.scaladsl.server.{HttpApp, RequestContext}
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import group.research.aging.geometa.web.controller.SequencingController
 import group.research.aging.util.PercentDecoder._
@@ -27,11 +28,20 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
   //lazy val config = ConfigFactory.load().getString("sqlite")
 
   def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
-   lazy val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
+  //lazy val url = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
 
-  implicit val postgresTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
-    "org.postgresql.Driver", url = "jdbc:postgresql://127.0.0.1:5432/sequencing", "postgres", "changeme"
-  )
+
+  val jdbcUrl = "jdbc:postgresql://127.0.0.1:5432/sequencing"
+  val username = "postgres"
+  val password = "changeme"
+  val poolSize = 40
+  val config = new HikariConfig()
+  config.setJdbcUrl(jdbcUrl)
+  config.setUsername(username)
+  config.setPassword(password)
+  config.setMaximumPoolSize(poolSize)
+
+  implicit val postgresTransactor: IO[HikariTransactor[IO]] = IO.pure(HikariTransactor.apply[IO](new HikariDataSource(config)))
 
   val controller = new SequencingController(postgresTransactor)
 
@@ -114,21 +124,14 @@ object WebServer extends HttpApp with FailFastCirceSupport with LogSupport with 
       //controller.loadSequencing(actions.QueryParameters.mus)
       List("")
     }
-    } ~ pathPrefix("tsv" / "gse" / Remaining) { series => complete{
-      //controller.sequencing(limit = defaultLimit).asJson
-      val gse = series.split('-').filter(_!="").toList
-      val loaded = controller.loadSequencing(actions.QueryParameters.empty.copy(series = gse))
-      val str = loaded.sequencing.map(l=>l.asStringList.mkString("\t"))
-      str
-    }
-    } ~ pathPrefix("temp" / Remaining) { series => complete{
-      //controller.sequencing(limit = defaultLimit).asJson
-      val gse = series.split('-').filter(_!="").toList
-      val loaded = controller.loadSequencing(actions.QueryParameters.rna.copy(series = gse))
-      val header = "GSM\tGSE\tSpecies\tSequencer\tType\tSex\tAge\tTissue\tExtracted molecule\tStrain\tComments"
-      val result = header::loaded.sequencing.map(l=>l.gsm + "\t" + l.series_id + "\t" + l.organism_ch1 + "\t" + l.sequencer + "\tNA\tNA\tNA\tNA\tNA\tNA\tNA")   
-      HttpResponse(  entity = HttpEntity(MediaTypes.`text/csv`.withCharset(HttpCharsets.`UTF-8`),  result.foldLeft(""){ case (acc, el)=> acc + el + "\n"}   ))
-    }
+    } ~ pathPrefix("tsv" / "gse" / Remaining) { series =>
+      complete {
+        //controller.sequencing(limit = defaultLimit).asJson
+        val gse = series.split('-').filter(_ != "").toList
+        val loaded = controller.loadSequencing(actions.QueryParameters.empty.copy(series = gse))
+        val str = loaded.sequencing.map(l => l.asStringList.mkString("\t"))
+        str
+      }
     }
   }
 

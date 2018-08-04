@@ -6,12 +6,12 @@ import io.circe.generic.JsonCodec
 import scala.collection.immutable._
 
 object SuggestionsInfo{
-  lazy val empty = SuggestionsInfo(Nil, Nil)
+  lazy val empty = SuggestionsInfo(List.empty, List.empty, List.empty)
 }
 @JsonCodec case class SuggestionsInfo(
-                                       species: List[String],
-                                       molecules: List[String] = Nil,
-                                       sequencers: List[String] = Nil,
+                                       species: List[(Int, String)],
+                                       molecules: List[(Int, String)],
+                                       sequencers: List[(Int, String)],
                                      ) extends Action
 object QueryParameters {
   lazy val empty = QueryParameters()

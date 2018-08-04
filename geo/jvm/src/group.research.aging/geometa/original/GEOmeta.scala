@@ -67,17 +67,20 @@ class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with Lo
     q
   }
 
-  def all_sequencers() = {
-    val q: doobie.ConnectionIO[List[String]] =
+  def all_sequencers(): SortedSet[String] = {
+    val q =
       sql"""SELECT DISTINCT gpl.title
         FROM gpl
         WHERE gpl.technology = ${technology}
-        ;""".query[String].to[List]
-    val list = run(q).map(get_sequencer)
-    SortedSet(list:_*)
+        ;""".query[String].to[SortedSet]
+    run(q).map(get_sequencer)
   }
 
-  def all_molecules() = run(allBy(fr"gsm.molecule_ch1").query[String].to[List])
-  def all_species() = run(allBy(fr"gpl.organism").query[String].to[List]).flatMap(s=>s.split("\t").map(_.trim)).distinct
+  def all_molecules(): SortedSet[String] = run(allBy(fr"gsm.molecule_ch1").query[String].to[SortedSet])
+  def all_species(): SortedSet[String] = run(allBy(fr"gpl.organism").query[String]
+    .to[SortedSet])
+    .flatMap(s=>s.split("\t")
+      .map(_.replace(";", "").trim)
+    )
   
 }

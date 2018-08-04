@@ -94,7 +94,7 @@ object geo extends Module {
 
 		override def pomSettings =  generalPomSettings
 
-		override def publishVersion = "0.0.4"
+		override def publishVersion = "0.0.5"
 	}
 }
 

@@ -41,12 +41,12 @@ class QueryBuilderSequencing  extends QueryBuilder{
   def withSpecies(values: List[String]): Option[doobie.Fragment] = None //addInOpt(fr"gsm.organism_ch1", values)
 
   val sampleSelection = sql"""
-        SELECT samples.id, samples.title, samples.gsm, samples.gse, samples.gpl,
-          sequencers.model, molecules.molecule, organisms.name,
-          samples.characteristics, samples.status, samples.submission_date,
-          samples.last_update_date, samples.type, samples.source_name,
-          samples.treatment_protocol, samples.extract_protocol,
-          samples.description, samples.data_processing, samples.contact
+        SELECT samples.id, samples.title, samples.gsm, samples.gse, organisms.name,
+           molecules.molecule, sequencers.model, samples.characteristics,
+           samples.description, samples.treatment_protocol, samples.extract_protocol,
+           samples.source_name, samples.data_processing,
+           samples.submission_date, samples.last_update_date, samples.status,
+           samples.type, samples.contact, samples.gpl
         FROM samples, organisms, molecules, sequencers
     """
 

@@ -22,12 +22,12 @@ object Sequencing {
 }
 
 /**
-SELECT samples.id, samples.title, samples.gsm, samples.gse, samples.gpl,
-          sequencers.model, molecules.molecule, organisms.name,
-          samples.characteristics, samples.status, samples.submission_date,
-          samples.last_update_date, samples.type, samples.source_name,
-          samples.treatment_protocol, samples.extract_protocol,
-          samples.description, samples.data_processing, samples.contact
+SELECT samples.id, samples.title, samples.gsm, samples.gse, organisms.name,
+           molecules.molecule, sequencers.model, samples.characteristics,
+           samples.description, samples.treatment_protocol, samples.extract_protocol,
+           samples.source_name, samples.data_processing,
+           samples.submission_date, samples.last_update_date, samples.status,
+           samples.type, samples.contact, samples.gpl
   FROM samples, organisms, molecules, sequencers
   WHERE samples.organism_id = organisms.id AND samples.molecule_id = molecules.id AND samples.sequencer_id =  sequencers.id
 LIMIT 30
@@ -39,22 +39,22 @@ LIMIT 30
                                      title: String,
                                      gsm: String,
                                      gse: String,
-                                     gpl: String,
-                                     sequencer: String,
-                                     molecule: String,
                                      organism: String,
+                                     molecule: String,
+                                     sequencer: String,
                                      characteristics: String,
-                                     status: String,
-                                     submission_date: String,
-                                     last_update_date: String,
-                                     `type`: String,
-                                     source_name: String,
+                                     description:  String,
                                      treatment_protocol: String,
                                      extract_protocol: String,
-                                     description:  String,
+                                     source_name: String,
                                      data_processing: String,
+                                     submission_date: String,
+                                     last_update_date: String,
+                                     status: String,
+                                     `type`: String,
                                      contact: String,
-                                   ){
+                                     gpl: String
+                                ){
 
   lazy val asRecord = Sequencing.labeledGen.to(this)
   def asMap = asRecord.toMap

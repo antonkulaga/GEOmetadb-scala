@@ -28,7 +28,7 @@ trait QueryRunner {
 
   def countQuery(table: String) = (fr"select count(*) from" ++ Fragment.const(table)).query[Int].unique
 
-  def cleanQuery(table: String): ConnectionIO[Int] = (fr"DELETE FROM sequencers" ++ Fragment.const(table)).update.run
+  def cleanQuery(table: String): ConnectionIO[Int] = (fr"DELETE FROM" ++ Fragment.const(table)).update.run
 
   def cleanIncrement(sequence: String): ConnectionIO[Int] = (fr"ALTER SEQUENCE"++Fragment.const(sequence)++fr"RESTART WITH 1").update.run
 
