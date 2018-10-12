@@ -8,9 +8,9 @@ import ammonite.ops._
 import coursier.maven.MavenRepository
 import mill.scalalib.publish.{Developer, License, PomSettings, VersionControl}
 
-val scala_version = "2.12.6"
+val scala_version = "2.12.7"
 
-val scala_js_version = "0.6.24"
+val scala_js_version = "0.6.25"
 
 val src = "src"
 
@@ -43,11 +43,11 @@ object geo extends Module {
 
   def geo_ivy_deps = Agg(
     ivy"com.lihaoyi::pprint:0.5.3",
-    ivy"io.circe::circe-core:0.9.3",
-    ivy"io.circe::circe-generic:0.9.3",
-    ivy"io.circe::circe-generic-extras:0.9.3",
-    ivy"io.circe::circe-parser:0.9.3",
-    ivy"org.wvlet.airframe::airframe-log::0.52"
+    ivy"io.circe::circe-core:0.9.3", //0.10.0
+    ivy"io.circe::circe-generic:0.9.3", //0.10.0
+    ivy"io.circe::circe-generic-extras:0.9.3", //0.10.0
+    ivy"io.circe::circe-parser::0.9.3", //0.10.0
+    ivy"org.wvlet.airframe::airframe-log::0.69"
 	)
 
   object js extends ScalaJSModule {
@@ -80,9 +80,10 @@ object geo extends Module {
 		)
 
     override def ivyDeps = geo_ivy_deps ++ Agg(
-  		ivy"org.xerial:sqlite-jdbc:3.18.0",
-      ivy"org.postgresql:postgresql:9.4.1208",
-      ivy"com.kailuowang::henkan-convert:0.6.2",
+  		ivy"org.xerial:sqlite-jdbc:3.25.2",
+      //ivy"org.postgresql:postgresql:9.4.1208",
+			ivy"org.postgresql:postgresql:42.2.5",
+			ivy"com.kailuowang::henkan-convert:0.6.2",
       ivy"com.kailuowang::henkan-optional:0.6.2",
       ivy"org.tpolecat::doobie-core:0.5.3",
       ivy"org.tpolecat::doobie-postgres:0.5.3",
@@ -94,7 +95,7 @@ object geo extends Module {
 
 		override def pomSettings =  generalPomSettings
 
-		override def publishVersion = "0.0.5"
+		override def publishVersion = "0.0.6"
 	}
 }
 
@@ -109,7 +110,7 @@ object web extends Module{
     ivy"com.nrinaudo::kantan.csv-generic::0.4.0",
     ivy"com.nrinaudo::kantan.csv-cats::0.4.0",
  //   ivy"group.research.aging::cromwell-client::0.0.13",
-    ivy"io.lemonlabs::scala-uri::1.1.4"
+    ivy"io.lemonlabs::scala-uri::1.3.1"
   )
 
 
@@ -160,13 +161,13 @@ object web extends Module{
 
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
-			ivy"com.typesafe.akka::akka-stream:2.5.14",
-			ivy"com.typesafe.akka::akka-http:10.1.3",
-			ivy"com.typesafe.akka::akka-http-xml:10.1.3",
-			ivy"com.typesafe.akka::akka-http-caching:10.1.3",
-			ivy"de.heikoseeberger::akka-http-circe:1.21.0",
+			ivy"com.typesafe.akka::akka-stream:2.5.17",
+			ivy"com.typesafe.akka::akka-http:10.1.5",
+			ivy"com.typesafe.akka::akka-http-xml:10.1.5",
+			ivy"com.typesafe.akka::akka-http-caching:10.1.5",
+			ivy"de.heikoseeberger::akka-http-circe:1.21.0", //1.22.0",
 			ivy"com.pepegar::hammock-akka-http:0.8.5",
-			ivy"org.apache.jena:jena-arq:3.8.0"
+			ivy"org.apache.jena:jena-arq:3.9.0"
 		)
 
 	  override def repositories = super.repositories ++ resolvers

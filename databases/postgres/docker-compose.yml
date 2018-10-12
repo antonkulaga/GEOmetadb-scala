@@ -9,9 +9,8 @@ services:
       POSTGRES_PASSWORD: changeme
       PGDATA: /data/postgres
     volumes:
-       #- ./init/geometa_schema.sql:/docker-entrypoint-initdb.d/geometa_schema.sql
        - ./init/sequencing.sql:/docker-entrypoint-initdb.d/sequencing.sql
-       - /pipelines/data/postgres:/data/postgres
+       - /data/postgres:/data/postgres
     ports:
       - 5432:5432
 
