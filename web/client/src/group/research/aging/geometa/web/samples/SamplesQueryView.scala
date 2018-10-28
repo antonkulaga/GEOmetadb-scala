@@ -22,7 +22,6 @@ class SamplesQueryView(suggestions: Rx[actions.SuggestionsInfo], toLoad: Var[act
 
   lazy val speciesHTML = <select class="ui fluid search dropdown" multiple="true">
     { species.map(ss =>ss.map{ case (k, v)=>option(k.toString,v) }) }
-
   </select>
 
   lazy val platformsHTML = <select class="ui fluid search dropdown" multiple="true">

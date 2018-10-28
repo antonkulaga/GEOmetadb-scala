@@ -134,7 +134,7 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 		ivy"org.scala-js::scalajs-dom::0.9.6",
-    ivy"in.nvilla::monadic-html::0.4.0-RC1",
+        ivy"in.nvilla::monadic-html::0.4.0-RC1",
 		ivy"org.querki::jquery-facade::1.2"
 	  )
 

@@ -3,7 +3,7 @@ scala code to deal with GEOmetadb.
 Includes the code to deal with GEOmetadb sqlite (geo subprojects) as well as web-based UI to search it (web.server and web.client subprojects).
 
 Starting postgres containers
--------------------
+----------------------------
 
 If no postgres database is running you can start the default one.
 You should use docker swarm, that you can initialize with:
@@ -29,7 +29,7 @@ databases/postgres/migrate.sh
 ```
 
 Running
-------
+-------
 
 To start the Web-based UI you should:
 * download latest GEOMetadb Sqlite from https://gbnci-abcc.ncifcrf.gov/geo/GEOmetadb.sqlite.gz
