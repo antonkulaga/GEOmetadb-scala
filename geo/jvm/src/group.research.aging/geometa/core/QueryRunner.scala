@@ -16,7 +16,7 @@ trait QueryRunner {
 
   def run[T](q: doobie.ConnectionIO[T]): T =
     (for{ xa <- transactor ; selection <- q.transact(xa)} yield selection).unsafeRunSync
-
+/*
   def debug[T](q: Query0[T])=
     {
       transactor.flatMap{ xa =>
@@ -25,7 +25,7 @@ trait QueryRunner {
         q.check
       }
     }.unsafeRunSync()
-
+*/
   def countQuery(table: String) = (fr"select count(*) from" ++ Fragment.const(table)).query[Int].unique
 
   def cleanQuery(table: String): ConnectionIO[Int] = (fr"DELETE FROM" ++ Fragment.const(table)).update.run

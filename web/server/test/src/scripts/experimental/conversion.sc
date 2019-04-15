@@ -11,12 +11,10 @@ import group.research.aging.geometa.sequencing._
 import pprint.PPrinter.BlackWhite
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
-val sqliteConnectionURL = sqliteUrl("/pipelines/data/GEOmetadb.sqlite")
-val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sequencing" //sequencing
+val sqliteConnectionURL = sqliteUrl("/data/databases/sqlite/GEOmetadb.sqlite")
+val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sra" //sequencing
 
 implicit val mstr = Meta[String]
-
-Transactor.strategy
 
 implicit val sqliteTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
   "org.sqlite.JDBC", sqliteConnectionURL, "", ""
@@ -24,8 +22,8 @@ implicit val sqliteTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHi
 
 val geo = new GEOmeta(sqliteTransactor)
 
-
-val jdbcUrl = "jdbc:postgresql://127.0.0.1:5432/sequencing"
+val host = "db" //127.0.0.1
+val jdbcUrl = s"jdbc:postgresql://${host}:5432/sra"
 val username = "postgres"
 val password = "changeme"
 val poolSize = 40
