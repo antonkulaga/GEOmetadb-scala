@@ -54,7 +54,6 @@ object geo extends Module {
 
     def scalaJSVersion = scala_js_version
 
-
     override def ivyDeps = geo_ivy_deps
 
     override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ plugins
@@ -133,7 +132,7 @@ object web extends Module{
 
 	  override def ivyDeps = self.ivyDeps ++ Agg(
 		ivy"org.scala-js::scalajs-dom::0.9.6",
-        ivy"in.nvilla::monadic-html::0.4.0-RC1",
+        	ivy"in.nvilla::monadic-html::0.4.0-RC1",
 		ivy"org.querki::jquery-facade::1.2"
 	  )
 

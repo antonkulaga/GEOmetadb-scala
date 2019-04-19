@@ -10,6 +10,8 @@ import wvlet.log.{LogLevel, LogSupport, Logger}
 import scala.scalajs.js.annotation._
 import scala.util._
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
+import io.circe.Json
+
 
 @JSExportTopLevel("MainJS")
 object MainJS extends Base{
@@ -61,13 +63,13 @@ object MainJS extends Base{
     </div>
 
   import cats.effect.IO
-  import hammock.{Hammock, _}
+  import hammock._
   import hammock.circe.implicits._
   import hammock.js.Interpreter
   import hammock.marshalling._
   //import io.circe.generic.auto._
 
-  implicit val interpreter: Interpreter[IO] = Interpreter[IO]
+  implicit val interpreter: InterpTrans[IO] = hammock.fetch.Interpreter[IO]
 
   lazy val loadReducer: Reducer = {
 
@@ -80,7 +82,8 @@ object MainJS extends Base{
       val pms = if(parameters.isEmpty) "" else "/" + parameters.mkString("-")
       val path = s"/data/${page + pms}"
       val u = Uri(path = path)
-      Hammock.request(Method.GET, u, Map.empty)
+/*
+      Hammock.request[Json](Method.GET, u, Map.empty, None)
         .as[actions.LoadedSequencing]
         .exec[IO].unsafeToFuture()
         .onComplete{
@@ -90,6 +93,7 @@ object MainJS extends Base{
             error(th)
             throwError := actions.ExplainedError(s"loading page ${page} with uri ${u} failed", th.getMessage)
         }
+  */
       previous.copy(page = page, parameters = parameters)
 
     case (previous, seq: actions.LoadedSequencing) =>
