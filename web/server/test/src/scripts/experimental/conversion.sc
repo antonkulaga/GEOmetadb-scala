@@ -5,18 +5,30 @@ import cats.implicits._
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import doobie._
 import doobie.hikari.HikariTransactor
-import doobie.util.meta.Meta
+//import doobie.util.meta.Meta
 import group.research.aging.geometa.original.GEOmeta
 import group.research.aging.geometa.sequencing._
 import pprint.PPrinter.BlackWhite
+import doobie.implicits._
+import cats.effect.IOApp
+import cats.effect.ContextShift
+import scala.concurrent.ExecutionContext.global
+import doobie.util.ExecutionContexts
+
+// We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
+// is where nonblocking operations will be executed. For testing here we're using a synchronous EC.
+implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
+
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
 val sqliteConnectionURL = sqliteUrl("/data/databases/sqlite/GEOmetadb.sqlite")
 val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sra" //sequencing
 
 implicit val mstr = Meta[String]
+val p = ExecutionContexts.fixedThreadPool[IO](32)
 
-implicit val sqliteTransactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
+
+implicit val sqliteTransactor: Transactor.Aux[IO, Unit] =  Transactor.fromDriverManager[IO](
   "org.sqlite.JDBC", sqliteConnectionURL, "", ""
 )
 
@@ -26,16 +38,20 @@ val host = "db" //127.0.0.1
 val jdbcUrl = s"jdbc:postgresql://${host}:5432/sra"
 val username = "postgres"
 val password = "changeme"
+/*
 val poolSize = 40
 val config = new HikariConfig()
 config.setJdbcUrl(jdbcUrl)
 config.setUsername(username)
 config.setPassword(password)
 config.setMaximumPoolSize(poolSize)
-
+*/
+/*
 implicit val postgresTransactor: IO[HikariTransactor[IO]] =
   IO.pure(HikariTransactor.apply[IO](new HikariDataSource(config)))
+*/
 
+val postgresTransactor: Transactor.Aux[IO, Unit]  = Transactor.fromDriverManager[IO]("org.postgresql.Driver", jdbcUrl, username, password)
 
 val controller = new SequencingLoader(postgresTransactor)
 
@@ -48,9 +64,11 @@ class ConverterExperimental(original: GEOmeta, loader: SequencingLoader)  extend
   }
   */
 }
+/*
 val transactor: IO[HikariTransactor[IO]] = HikariTransactor.newHikariTransactor[IO](
    "org.postgresql.Driver", url = postgresConnectionURL, "postgres", "changeme"
 )
+*/
 
 val converter: Converter = new ConverterExperimental(geo, controller)
 

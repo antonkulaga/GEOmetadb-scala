@@ -12,10 +12,10 @@ import scala.collection.immutable.List
 
 
 trait QueryRunner {
-  def transactor: IO[HikariTransactor[IO]]
+  def transactor: Transactor.Aux[IO, Unit]
 
   def run[T](q: doobie.ConnectionIO[T]): T =
-    (for{ xa <- transactor ; selection <- q.transact(xa)} yield selection).unsafeRunSync
+    q.transact(transactor).unsafeRunSync
 /*
   def debug[T](q: Query0[T])=
     {

@@ -10,7 +10,7 @@ import mill.scalalib.publish.{Developer, License, PomSettings, VersionControl}
 
 val scala_version = "2.12.8"
 
-val scala_js_version = "0.6.26"
+val scala_js_version = "0.6.28"
 
 val src = "src"
 
@@ -41,12 +41,12 @@ object geo extends Module {
   def scalaVersion = scala_version
 
   def geo_ivy_deps = Agg(
-    ivy"com.lihaoyi::pprint:0.5.4",
+    ivy"com.lihaoyi::pprint:0.5.5",
     ivy"io.circe::circe-core:0.11.1", //0.10.0
     ivy"io.circe::circe-generic:0.11.1", //0.10.0
     ivy"io.circe::circe-generic-extras:0.11.1", //0.10.0
     ivy"io.circe::circe-parser::0.11.1", //0.10.0
-    ivy"org.wvlet.airframe::airframe-log::19.4.1"
+    ivy"org.wvlet.airframe::airframe-log::19.7.3"
 	)
 
   object js extends ScalaJSModule {
@@ -78,14 +78,14 @@ object geo extends Module {
 		)
 
     override def ivyDeps = geo_ivy_deps ++ Agg(
-  		ivy"org.xerial:sqlite-jdbc:3.27.2.1",
+  		ivy"org.xerial:sqlite-jdbc:3.28.0",
       //ivy"org.postgresql:postgresql:9.4.1208",
-			ivy"org.postgresql:postgresql:42.2.5",
-			ivy"com.kailuowang::henkan-convert:0.6.3",
-      ivy"com.kailuowang::henkan-optional:0.6.3",
-      ivy"org.tpolecat::doobie-core:0.6.0",
-      ivy"org.tpolecat::doobie-postgres:0.6.0",
-      ivy"org.tpolecat::doobie-hikari:0.6.0"
+			ivy"org.postgresql:postgresql:42.2.6",
+			ivy"com.kailuowang::henkan-convert:0.6.4",
+      ivy"com.kailuowang::henkan-optional:0.6.4",
+      ivy"org.tpolecat::doobie-core:0.7.0",
+      ivy"org.tpolecat::doobie-postgres:0.7.0",
+      ivy"org.tpolecat::doobie-hikari:0.7.0"
     )
 
     override def scalacPluginIvyDeps = plugins
@@ -93,7 +93,7 @@ object geo extends Module {
 
 		override def pomSettings =  generalPomSettings
 
-		override def publishVersion = "0.0.7"
+		override def publishVersion = "0.0.8"
 	}
 }
 
@@ -105,8 +105,8 @@ object web extends Module{
     ivy"com.pepegar::hammock-core::0.9.1",
     ivy"com.pepegar::hammock-circe::0.9.1",
     ivy"com.github.japgolly.scalacss::core::0.5.5",
-    ivy"com.nrinaudo::kantan.csv-generic::0.5.0",
-    ivy"com.nrinaudo::kantan.csv-cats::0.5.0",
+    ivy"com.nrinaudo::kantan.csv-generic::0.5.1",
+    ivy"com.nrinaudo::kantan.csv-cats::0.5.1",
  //   ivy"group.research.aging::cromwell-client::0.0.13",
     ivy"io.lemonlabs::scala-uri::1.4.5"
   )
@@ -165,7 +165,7 @@ object web extends Module{
 			ivy"com.typesafe.akka::akka-http-caching:10.1.8",
 			ivy"de.heikoseeberger::akka-http-circe:1.25.2", //1.22.0",
 			ivy"com.pepegar::hammock-akka-http:0.9.1",
-			ivy"org.apache.jena:jena-arq:3.10.0"
+			ivy"org.apache.jena:jena-arq:3.12.0"
 		)
 
 	  override def repositories = super.repositories ++ resolvers
@@ -186,7 +186,7 @@ object web extends Module{
 	  object test extends Tests{
 
 			override def ivyDeps = Agg(
-				ivy"org.scalatest::scalatest:3.0.7"
+				ivy"org.scalatest::scalatest:3.0.8"
 			)
 
 			def testFrameworks = Seq("org.scalatest.tools.Framework")

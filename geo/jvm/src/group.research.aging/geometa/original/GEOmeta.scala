@@ -13,7 +13,7 @@ import doobie.hikari._
 import doobie.implicits._
 
 
-class GEOmeta(val transactor: IO[HikariTransactor[IO]]) extends BasicGEO with LogSupport
+class GEOmeta(val transactor: Transactor.Aux[IO, Unit]) extends BasicGEO with LogSupport
 {
 
   protected def makeWhere(

@@ -11,7 +11,7 @@ import wvlet.log.LoggingMethods
 
 import scala.collection.immutable.{List, Nil}
 
-class SequencingLoader(val transactor: IO[HikariTransactor[IO]], defaultLimit: Int = 0)  extends QueryRunner {
+class SequencingLoader(val transactor: Transactor.Aux[IO, Unit], defaultLimit: Int = 0)  extends QueryRunner {
 
 
   val builder = new QueryBuilderSequencing
