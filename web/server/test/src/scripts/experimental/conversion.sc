@@ -22,7 +22,6 @@ implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
 
 def sqliteUrl(str: String) = s"jdbc:sqlite:${str}"
 val sqliteConnectionURL = sqliteUrl("/data/databases/sqlite/GEOmetadb.sqlite")
-val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sra" //sequencing
 
 implicit val mstr = Meta[String]
 val p = ExecutionContexts.fixedThreadPool[IO](32)
@@ -34,8 +33,11 @@ implicit val sqliteTransactor: Transactor.Aux[IO, Unit] =  Transactor.fromDriver
 
 val geo = new GEOmeta(sqliteTransactor)
 
-val host = "db" //127.0.0.1
-val jdbcUrl = s"jdbc:postgresql://${host}:5432/sra"
+//val host = "db" //127.0.0.1
+//val jdbcUrl = s"jdbc:postgresql://${host}:5432/sra"
+
+val postgresConnectionURL = "jdbc:postgresql://127.0.0.1:5432/sra" //sequencing
+
 val username = "postgres"
 val password = "changeme"
 /*
@@ -51,7 +53,7 @@ implicit val postgresTransactor: IO[HikariTransactor[IO]] =
   IO.pure(HikariTransactor.apply[IO](new HikariDataSource(config)))
 */
 
-val postgresTransactor: Transactor.Aux[IO, Unit]  = Transactor.fromDriverManager[IO]("org.postgresql.Driver", jdbcUrl, username, password)
+val postgresTransactor: Transactor.Aux[IO, Unit]  = Transactor.fromDriverManager[IO]("org.postgresql.Driver", postgresConnectionURL, username, password)
 
 val controller = new SequencingLoader(postgresTransactor)
 
